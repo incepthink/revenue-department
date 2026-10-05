@@ -1,0 +1,65 @@
+# GR library taxonomy (Part 2). Topics tag documents (proposed by the model, confirmed by the operator); folders give
+# each PDF a starting topic and, for case folders, the accepted case it was gathered for.
+topics:
+  class2_to_class1: {mr: "भोगवटादार वर्ग-२ ते वर्ग-१ रूपांतरण", en: "Class-II to Class-I conversion (free hold)"}
+  unearned_income: {mr: "अनर्जित उत्पन्न", en: "Unearned income"}
+  breach_regularisation: {mr: "शर्तभंग नियमानुकूल करणे", en: "Breach of conditions, regularisation"}
+  transfer_permission: {mr: "हस्तांतरण / वापर बदल परवानगी", en: "Transfer and change-of-use permission"}
+  premium_rates: {mr: "अधिमूल्य दर", en: "Premium rates and calculation"}
+  land_valuation: {mr: "जमिनीचे मूल्यांकन", en: "Land valuation"}
+  lease: {mr: "भाडेपट्टा व नूतनीकरण", en: "Lease and lease renewal"}
+  redevelopment: {mr: "पुनर्विकास", en: "Redevelopment"}
+  construction_extension: {mr: "बांधकाम मुदतवाढ", en: "Construction time extension"}
+  advance_possession: {mr: "आगाऊ ताबा", en: "Advance possession"}
+  housing_societies: {mr: "सहकारी गृहनिर्माण संस्था", en: "Co-operative housing societies"}
+  industrial_estate: {mr: "औद्योगिक वसाहत", en: "Industrial estates"}
+  sports_grounds: {mr: "क्रीडांगण / जिमखाना", en: "Sports grounds and gymkhanas"}
+  education: {mr: "शैक्षणिक संस्था", en: "Education institutions"}
+  hh_form: {mr: "एच.एच. फॉर्म", en: "H.H. form policy"}
+  court_orders: {mr: "न्यायालयीन आदेश", en: "Court orders"}
+
+types:
+  gr: {mr: "शासन निर्णय", en: "GR"}
+  gazette: {mr: "अधिसूचना (राजपत्र)", en: "Gazette notification"}
+  circular: {mr: "परिपत्रक", en: "Circular"}
+  letter: {mr: "पत्र", en: "Letter"}
+  case_note: {mr: "प्रकरण टिप्पणी", en: "Case note"}
+  court_order: {mr: "न्यायालयीन आदेश", en: "Court order"}
+  other: {mr: "इतर", en: "Other"}
+
+folders:
+  "Advance Possesion": [advance_possession]
+  "Education Police GR": [education]
+  "Free Hold": [class2_to_class1]
+  "HH Form policy": [hh_form]
+  "Kandivali Industrial Estt": [industrial_estate]
+  "Redevlopments GR": [redevelopment]
+  "Sarvodya Hospital": [unearned_income, class2_to_class1]
+  "Swastik Park Chembur": [unearned_income, class2_to_class1]
+  "बांधकाम मुदतवाढ": [construction_extension]
+  "भाडेपट्टा शासन निर्णय": [lease]
+  "विनापरवानगी वापर बदल व भूखंड हस्तांतरण": [unearned_income, transfer_permission]
+
+# Folders gathered for an accepted case (the documents in them relate to that case).
+case_folders:
+  "Sarvodya Hospital": "Chandralayam View CHS, Chembur (543A)"
+  "Swastik Park Chembur": "Swastik Park, Chembur (Chembur Kranti CHS, Swastik Kutir CHS)"
+
+# Never ingested: the 332-page compendium (its GRs are covered by the individual files).
+skip:
+  - "GRs folder/GR Collection Set A to L.pdf"
+
+# The roadmap's proposed starter set (the Chembur / housing-society lane). The inventory marks these
+# `proposed_starter: true`; the operator confirms by setting `starter: true`.
+starter_hints:
+  - "Sarvodya Hospital/Chandralayam View CHS Chembur 543A.pdf"
+  - "Swastik Park Chembur/Free hold Chembur Kranti co op soc.pdf"
+  - "Swastik Park Chembur/Swastik Kutir co op soc Nov 25.pdf"
+  - "Sarvodya Hospital/05.07.2023 Unauerd Income.pdf"
+  - "Free Hold/Gazette 2025 Dt. 04.03.2025.pdf"
+  - "Free Hold/Corrigendum Dt. 06.03.2025.pdf"
+  - "Free Hold/Gazette Dt. 27.03.2023 Extention.pdf"
+  - "Free Hold/Gazette Dt. 08.03.2019.pdf"
+  - "भाडेपट्टा शासन निर्णय/GR 20.02.2016 Land Valuation.pdf"
+  - "भाडेपट्टा शासन निर्णय/GR-15.05.2025.pdf"
+  - "भाडेपट्टा शासन निर्णय/GR- 17.09.2025 Unared Income Recovery.pdf"

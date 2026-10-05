@@ -1,0 +1,146 @@
+{
+  "case_ref": "DKT-003",
+  "notes": "Payment stage; replacement property card in query response; two back-to-back challans.",
+  "page_count": 12,
+  "exhibits": [
+    {
+      "type": "APPLICATION",
+      "stage": "filing",
+      "pages": [
+        1,
+        1
+      ],
+      "document": "docket.pdf"
+    },
+    {
+      "type": "PROPERTY_CARD",
+      "stage": "filing",
+      "pages": [
+        2,
+        2
+      ],
+      "document": "docket.pdf"
+    },
+    {
+      "type": "SGM_RESOLUTION",
+      "stage": "filing",
+      "pages": [
+        3,
+        3
+      ],
+      "document": "docket.pdf"
+    },
+    {
+      "type": "AFFIDAVIT",
+      "stage": "filing",
+      "pages": [
+        4,
+        5
+      ],
+      "document": "docket.pdf"
+    },
+    {
+      "type": "QUERY_LETTER",
+      "stage": "internal",
+      "pages": [
+        6,
+        7
+      ],
+      "document": "docket.pdf"
+    },
+    {
+      "type": "QUERY_REPLY",
+      "stage": "query_response",
+      "pages": [
+        8,
+        8
+      ],
+      "document": "docket.pdf"
+    },
+    {
+      "type": "PROPERTY_CARD",
+      "stage": "query_response",
+      "pages": [
+        9,
+        9
+      ],
+      "document": "docket.pdf"
+    },
+    {
+      "type": "DEMAND_LETTER",
+      "stage": "internal",
+      "pages": [
+        10,
+        10
+      ],
+      "document": "docket.pdf"
+    },
+    {
+      "type": "CHALLAN",
+      "stage": "final",
+      "pages": [
+        11,
+        11
+      ],
+      "document": "docket.pdf"
+    },
+    {
+      "type": "CHALLAN",
+      "stage": "final",
+      "pages": [
+        12,
+        12
+      ],
+      "document": "docket.pdf"
+    }
+  ],
+  "facts": {
+    "society.name": "साई दर्शन सहकारी गृहनिर्माण संस्था मर्यादित",
+    "society.registration_no": "PNA/HSG/(TC)/5678/2003-04",
+    "land.cts_no": "210/ब/3",
+    "land.village": "बाणेर",
+    "land.area_sqm": "2100.00",
+    "land.tenure": "occupancy_class_2",
+    "application.date": "2024-09-02",
+    "property_card.issue_date": "2024-10-20",
+    "sgm.meeting_date": "2024-08-15",
+    "sgm.members_total": 60,
+    "demand.amount": "6090000.00",
+    "payments.0.amount": "6090000.00",
+    "payments.1.amount": "12500.00",
+    "payments.1.grn": "MH004598765433202425",
+    "queries.0.items.count": 3
+  },
+  "validations": {
+    "CTS_MATCH": "pass",
+    "AREA_TOLERANCE": "pass",
+    "HOLDER_IS_SOCIETY": "pass",
+    "SGM_DATE_ORDER": "pass",
+    "PROPERTY_CARD_RECENCY": "pass"
+  },
+  "requirements": {
+    "PROPERTY_CARD_RECENT": "present",
+    "OCCUPANCY_CERTIFICATE": "queried",
+    "MEMBER_LIST": "queried",
+    "PREMIUM_PAYMENT": "present",
+    "UNDERTAKING_AFFIDAVIT": "present"
+  },
+  "events": [
+    "APPLICATION_FILED",
+    "QUERY_ISSUED",
+    "QUERY_REPLIED",
+    "DEMAND_ISSUED",
+    "PREMIUM_PAID",
+    "PREMIUM_PAID"
+  ],
+  "pii_values": [
+    "9012 3456 7825",
+    "9123 4567 8901 2346",
+    "AKLPB7788Q",
+    "9890123456",
+    "kiran.bhosale@example.in",
+    "9422177889",
+    "sd.chs.baner@gmail.com",
+    "किरण अशोक भोसले"
+  ]
+}

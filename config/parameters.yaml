@@ -1,0 +1,57 @@
+# Parameters the pipeline depends on. Anything the department has not confirmed stays `to_verify`;
+# validator and card output carries this status so reviewers see which checks rest on assumptions.
+parameters:
+  property_card_max_age_days:
+    value: 90
+    status: to_verify
+    notes: >
+      Maximum age of the property card (मिळकत पत्रिका) relative to the application date.
+      Office practice commonly cited as 3 months; needs written confirmation from the pilot office.
+  area_tolerance_pct:
+    value: 2.0
+    status: to_verify
+    notes: Allowed % difference between areas stated on application / property card / lease / field report.
+  area_tolerance_abs_sqm:
+    value: 5.0
+    status: to_verify
+    notes: Absolute tolerance (sq m) applied when it is larger than the % tolerance.
+  sgm_resolution_max_age_days:
+    value: 365
+    status: to_verify
+    notes: Maximum gap between the SGM resolution and the application date.
+  sgm_must_precede_application:
+    value: true
+    status: to_verify
+    notes: The special general meeting authorising the application must be held on/before the application date.
+  satbara_max_age_days:
+    value: 90
+    status: to_verify
+    notes: Maximum age of the 7/12 extract relative to the application date (intake check). Assumed equal to the property card.
+  tax_receipt_max_age_days:
+    value: 365
+    status: to_verify
+    notes: The latest property-tax receipt must be at most this old at the application date (intake check).
+
+  # Engineering parameters (ours to tune, not department facts).
+  classifier_min_score:
+    value: 4.0
+    status: verified
+    source: engineering
+  classifier_switch_confidence:
+    value: 0.6
+    status: verified
+    source: engineering
+  classifier_llm_fallback_below:
+    value: 0.55
+    status: verified
+    source: engineering
+  double_review_first_n:
+    value: 0
+    status: verified
+    source: engineering
+    notes: The first N cases reviewed are double-reviewed (two independent reviewers) for the agreement report. 0 because the platform has a single user.
+  review_high_confidence:
+    value: 0.9
+    status: verified
+    source: engineering
+    notes: Fields at or above this draft confidence are coloured green in the review form and can be bulk-accepted.

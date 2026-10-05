@@ -1,0 +1,28 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.hypothesis/
+*.egg-info/
+.env
+var/
+node_modules/
+.next/
+apps/web/next-env.d.ts
+eval/ocr_bench/real/
+
+deploy/aws/.env.prod
+.vercel
+
+# Local env files (keep the example)
+.env.*
+!.env.example
+
+# Department-provided source documents (not for the public repo)
+docs/provided-by-department/
+
+# Scratch / generated output
+tmp/
+output/
+*.tsbuildinfo
+.claude/
