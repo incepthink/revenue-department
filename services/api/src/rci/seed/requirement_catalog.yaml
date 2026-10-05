@@ -1,0 +1,142 @@
+# Requirement catalog v0 — document/process requirements seen in CHS Class-II → Class-I conversions.
+# Not a statement of law: statutory backing is attached in Phase 2 via rule_requirements (verified rows).
+# satisfied_by: exhibit types that satisfy the requirement.
+# query_keywords: words in a query-letter item that suggest this requirement was queried.
+# intake_slot: the upload slot (rci.intake.slots) that files this document at intake. Applicant documents without one
+#   are recognised among the additional documents. Which of them are required comes from rule_requirements.
+catalog_version: 0
+requirements:
+  - code: APPLICATION_FORM
+    name_en: Signed application by the society
+    name_mr: संस्थेचा स्वाक्षरीत अर्ज
+    category: applicant_document
+    satisfied_by: [APPLICATION]
+    query_keywords: ["अर्ज"]
+    status: verified
+    intake_slot: application
+  - code: SOCIETY_REGISTRATION
+    name_en: Society registration certificate
+    name_mr: संस्था नोंदणी प्रमाणपत्र
+    category: applicant_document
+    satisfied_by: [SOCIETY_REG_CERT]
+    query_keywords: ["नोंदणी प्रमाणपत्र", "registration"]
+    status: to_verify
+  - code: PROPERTY_CARD_RECENT
+    name_en: Recent property card
+    name_mr: अद्ययावत मिळकत पत्रिका
+    category: applicant_document
+    satisfied_by: [PROPERTY_CARD]
+    query_keywords: ["मिळकत पत्रिका", "property card", "अद्ययावत"]
+    status: to_verify
+    intake_slot: property_card
+  - code: LEASE_OR_GRANT_DOCUMENT
+    name_en: Lease deed / sanad / original grant order
+    name_mr: भाडेपट्टा करारनामा / सनद / मूळ वाटप आदेश
+    category: applicant_document
+    satisfied_by: [LEASE_SANAD]
+    query_keywords: ["भाडेपट्टा", "सनद", "वाटप आदेश", "lease"]
+    status: to_verify
+    intake_slot: grant
+  - code: SGM_RESOLUTION
+    name_en: Special General Meeting resolution authorising the conversion
+    name_mr: विशेष सर्वसाधारण सभेचा ठराव
+    category: applicant_document
+    satisfied_by: [SGM_RESOLUTION]
+    query_keywords: ["ठराव", "सर्वसाधारण सभ"]
+    status: to_verify
+  - code: MEMBER_LIST
+    name_en: Certified list of members
+    name_mr: प्रमाणित सभासद यादी
+    category: applicant_document
+    satisfied_by: [MEMBER_LIST]
+    query_keywords: ["सभासद यादी", "सभासदांची यादी"]
+    status: to_verify
+  - code: UNDERTAKING_AFFIDAVIT
+    name_en: Affidavit / undertaking by the society
+    name_mr: प्रतिज्ञापत्र / हमीपत्र
+    category: applicant_document
+    satisfied_by: [AFFIDAVIT]
+    query_keywords: ["प्रतिज्ञापत्र", "हमीपत्र", "affidavit"]
+    status: to_verify
+  - code: OCCUPANCY_CERTIFICATE
+    name_en: Occupancy / completion certificate of the building
+    name_mr: भोगवटा प्रमाणपत्र
+    category: applicant_document
+    satisfied_by: [OCCUPANCY_CERT]
+    query_keywords: ["भोगवटा प्रमाणपत्र", "occupancy certificate"]
+    status: to_verify
+  - code: CONVEYANCE_DEED
+    name_en: Conveyance deed in favour of the society
+    name_mr: अभिहस्तांतरण पत्र
+    category: applicant_document
+    satisfied_by: [CONVEYANCE_DEED]
+    query_keywords: ["अभिहस्तांतरण", "conveyance"]
+    status: to_verify
+  - code: NO_DUES_LEASE_RENT
+    name_en: No lease-rent dues certificate
+    name_mr: भाडेपट्टा थकबाकी नसल्याचा दाखला
+    category: applicant_document
+    satisfied_by: [NOC]
+    query_keywords: ["थकबाकी", "भाडे"]
+    applies_when: {tenure: govt_lease}
+    status: to_verify
+  - code: FIELD_INSPECTION
+    name_en: Site inspection report
+    name_mr: स्थळ पाहणी अहवाल
+    category: office_process
+    satisfied_by: [FIELD_REPORT]
+    query_keywords: ["स्थळ पाहणी"]
+    status: to_verify
+  - code: CTSO_MEASUREMENT
+    name_en: City Survey Officer measurement report
+    name_mr: नगर भूमापन अधिकारी मोजणी अहवाल
+    category: office_process
+    satisfied_by: [CTSO_REPORT]
+    query_keywords: ["मोजणी"]
+    applies_when: {validator_failed: AREA_TOLERANCE}
+    status: to_verify
+  - code: PREMIUM_PAYMENT
+    name_en: Premium (nazrana) paid into government account
+    name_mr: नजराणा / अधिमूल्य रक्कम शासन जमा
+    category: payment
+    satisfied_by: [CHALLAN]
+    query_keywords: ["चलन", "नजराणा", "अधिमूल्य"]
+    status: to_verify
+# Filing documents checked at intake only (not exhibits of the processed docket): inactive, so they are not drafted
+# onto case cards or reported as gaps by the analysis; rule_requirements still make them required at intake.
+  - code: SATBARA_EXTRACT
+    name_en: 7/12 extract of the land
+    name_mr: ७/१२ उतारा
+    category: applicant_document
+    satisfied_by: [SEVEN_TWELVE]
+    query_keywords: ["७/१२", "7/12", "सातबारा"]
+    status: to_verify
+    intake_slot: satbara
+    active: false
+  - code: IDENTITY_PROOF
+    name_en: Identity proof (Aadhaar) of the signatory
+    name_mr: स्वाक्षरीकर्त्याचे ओळखपत्र (आधार)
+    category: applicant_document
+    satisfied_by: []
+    query_keywords: ["आधार", "ओळखपत्र"]
+    status: to_verify
+    intake_slot: aadhaar
+    active: false
+  - code: PROPERTY_TAX_RECEIPTS
+    name_en: Property tax receipts
+    name_mr: मालमत्ता कर पावत्या
+    category: applicant_document
+    satisfied_by: []
+    query_keywords: ["मालमत्ता कर", "कर पावती"]
+    status: to_verify
+    intake_slot: tax_receipts
+    active: false
+  - code: INDEX_II
+    name_en: Index II of the last registered transaction
+    name_mr: सूची क्र. २
+    category: applicant_document
+    satisfied_by: []
+    query_keywords: ["सूची क्र", "index ii"]
+    status: to_verify
+    intake_slot: index_ii
+    active: false

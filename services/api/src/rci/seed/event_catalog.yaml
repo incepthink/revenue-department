@@ -1,0 +1,11 @@
+# Event catalog v0. date_field names the card field (on the source exhibit's extraction) that dates the event.
+catalog_version: 0
+events:
+  - {code: APPLICATION_FILED, name_en: Application filed, name_mr: अर्ज दाखल, actor: applicant, typical_order: 10, source_exhibit_types: [APPLICATION], date_field: application_date}
+  - {code: QUERY_ISSUED, name_en: Query letter issued, name_mr: त्रुटी पत्र जारी, actor: office, typical_order: 20, source_exhibit_types: [QUERY_LETTER], date_field: letter_date}
+  - {code: QUERY_REPLIED, name_en: Queries complied, name_mr: त्रुटी पूर्तता, actor: applicant, typical_order: 30, source_exhibit_types: [QUERY_REPLY], date_field: letter_date}
+  - {code: FIELD_INSPECTION_DONE, name_en: Site inspection, name_mr: स्थळ पाहणी, actor: talathi, typical_order: 40, source_exhibit_types: [FIELD_REPORT], date_field: inspection_date}
+  - {code: CTSO_MEASUREMENT_DONE, name_en: CTSO measurement, name_mr: नगर भूमापन मोजणी, actor: ctso, typical_order: 50, source_exhibit_types: [CTSO_REPORT], date_field: inspection_date}
+  - {code: DEMAND_ISSUED, name_en: Demand letter issued, name_mr: मागणी पत्र जारी, actor: office, typical_order: 60, source_exhibit_types: [DEMAND_LETTER], date_field: letter_date}
+  - {code: PREMIUM_PAID, name_en: Premium paid, name_mr: रक्कम शासन जमा, actor: applicant, typical_order: 70, source_exhibit_types: [CHALLAN], date_field: payment_date}
+  - {code: ORDER_ISSUED, name_en: Collector order issued, name_mr: जिल्हाधिकारी आदेश, actor: collector, typical_order: 80, source_exhibit_types: [COLLECTOR_ORDER], date_field: order_date}

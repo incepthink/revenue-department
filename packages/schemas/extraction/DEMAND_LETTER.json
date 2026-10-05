@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "extraction/DEMAND_LETTER.v1",
+  "title": "DEMAND_LETTER extraction",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "letter_date",
+    "amount"
+  ],
+  "properties": {
+    "letter_date": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "found",
+        "raw",
+        "page_seq"
+      ],
+      "properties": {
+        "found": {
+          "type": "boolean"
+        },
+        "raw": {
+          "type": "string",
+          "description": "Date of the demand letter"
+        },
+        "page_seq": {
+          "type": "integer"
+        }
+      }
+    },
+    "amount": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "found",
+        "raw",
+        "page_seq"
+      ],
+      "properties": {
+        "found": {
+          "type": "boolean"
+        },
+        "raw": {
+          "type": "string",
+          "description": "Amount demanded"
+        },
+        "page_seq": {
+          "type": "integer"
+        }
+      }
+    }
+  }
+}

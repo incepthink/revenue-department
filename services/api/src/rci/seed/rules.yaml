@@ -1,0 +1,371 @@
+# Rules layer seed — CHS on Occupancy Class-II / Government leasehold land → Occupancy Class-I.
+#
+# One rule set: the 2019 conversion rules. It says
+#   * which documents a case must be filed with (requirements → intake slots, requirement_catalog.yaml),
+#   * what the AI must check inside each filed document (document_checks, below),
+#   * what the society must do before the order issues (obligations),
+#   * the premium slabs the fee engine looks up (rates are left empty until they are read from the Gazette).
+#
+# Every row is `to_verify`: the rules are applied, but a failed check is at most a warning until an admin uploads the
+# notification, fills in source_ref and marks the row verified (a missing required document still blocks).
+# Re-seeding never overwrites a row an admin has touched (updated_by set). A seeded row (seed_key) that is removed from
+# this file is deleted from the database on the next seed; rule sets listed under `retired` are deleted with all their
+# rows. Rows an admin added in the UI are never touched.
+#
+# Keys: rule sets by `code`; child rows by `key` (→ seed_key).
+catalog_version: 1
+
+# Placeholder rule sets from the first seed (amendment / circular / amnesty windows with guessed dates). Add a new rule
+# set here — with the notification text — when one is actually in force.
+retired: [CIRCULAR_2021, AMEND_2023_03_27, AMNESTY_2024_03_16, AMNESTY_2024_06_28, NOTIF_2025_03_04]
+
+rule_sets:
+  - code: RULES_2019
+    name: Maharashtra Land Revenue (Conversion of Occupancy Class-II and Leasehold Lands into Occupancy Class-I) Rules, 2019
+    kind: base
+    notification_ref: Revenue & Forest Department notification, 2019 — enter the Gazette reference
+    notification_date: 2019-03-08
+    effective_from: 2019-03-08
+    status: to_verify
+    notes: >-
+      The rules a housing society applies under to convert its land from Occupancy Class-II or government lease to
+      Occupancy Class-I on payment of a premium. Confirm the notification date against the Gazette.
+
+    # Premium = rate_pct % of the land's value in the Annual Statement of Rates. The rate is not known yet: the fee
+    # engine stops with "rate not filled in" until it is entered from the notification.
+    slabs:
+      - {key: RULES_2019.CHS.OC2.RES, applicant_category: CHS, holding_basis: occupancy_class_2, land_use: residential, rate_pct: null, rate_basis: asr_land_value}
+      - {key: RULES_2019.CHS.OC2.COM, applicant_category: CHS, holding_basis: occupancy_class_2, land_use: commercial, rate_pct: null, rate_basis: asr_land_value}
+      - {key: RULES_2019.CHS.LEASE.RES, applicant_category: CHS, holding_basis: govt_lease, land_use: residential, rate_pct: null, rate_basis: asr_land_value}
+      - {key: RULES_2019.CHS.LEASE.COM, applicant_category: CHS, holding_basis: govt_lease, land_use: commercial, rate_pct: null, rate_basis: asr_land_value}
+
+    # Documents the case must be filed with. A requirement with an intake slot makes that upload required; the others
+    # (resolution, no-dues certificate) are recognised among the additional documents.
+    requirements:
+      - {key: RULES_2019.REQ.APPLICATION_FORM, requirement_code: APPLICATION_FORM, mandatory: true,
+         notes: The society's application to the Collector asking for the conversion.}
+      - {key: RULES_2019.REQ.SATBARA_EXTRACT, requirement_code: SATBARA_EXTRACT, mandatory: true,
+         notes: Shows who holds the land and in which occupancy class.}
+      - {key: RULES_2019.REQ.PROPERTY_CARD_RECENT, requirement_code: PROPERTY_CARD_RECENT, mandatory: true,
+         notes: City Survey record of the land; must be recent.}
+      - {key: RULES_2019.REQ.SGM_RESOLUTION, requirement_code: SGM_RESOLUTION, mandatory: true,
+         notes: The society's members must have decided, in a general meeting, to apply for the conversion.}
+      - {key: RULES_2019.REQ.LEASE_OR_GRANT_DOCUMENT, requirement_code: LEASE_OR_GRANT_DOCUMENT, mandatory: true, condition: {tenure: govt_lease},
+         notes: For leasehold land, the lease deed / grant shows the terms the land is held on.}
+      - {key: RULES_2019.REQ.NO_DUES_LEASE_RENT, requirement_code: NO_DUES_LEASE_RENT, mandatory: true, condition: {tenure: govt_lease},
+         notes: For leasehold land, lease rent must be paid up before the conversion.}
+      - {key: RULES_2019.REQ.IDENTITY_PROOF, requirement_code: IDENTITY_PROOF, mandatory: true,
+         notes: Identity of the office-bearer who signs the application.}
+      - {key: RULES_2019.REQ.PROPERTY_TAX_RECEIPTS, requirement_code: PROPERTY_TAX_RECEIPTS, mandatory: true,
+         notes: Shows the society has paid its property tax.}
+      - {key: RULES_2019.REQ.INDEX_II, requirement_code: INDEX_II, mandatory: true,
+         notes: The last registered transaction on the property (usually the conveyance to the society).}
+      - {key: RULES_2019.REQ.PREMIUM_PAYMENT, requirement_code: PREMIUM_PAYMENT, mandatory: true,
+         notes: Paid after the demand is issued; not checked at intake.}
+      # Supporting documents often filed with the application. Not mandatory: the AI recognises them among the
+      # additional documents (and applies their document checks) but their absence is not reported. Make one mandatory
+      # once the notification is read and it turns out to be required.
+      - {key: RULES_2019.REQ.SOCIETY_REGISTRATION, requirement_code: SOCIETY_REGISTRATION, mandatory: false,
+         notes: Registration certificate of the co-operative housing society.}
+      - {key: RULES_2019.REQ.MEMBER_LIST, requirement_code: MEMBER_LIST, mandatory: false,
+         notes: Certified list of the society's members.}
+      - {key: RULES_2019.REQ.UNDERTAKING_AFFIDAVIT, requirement_code: UNDERTAKING_AFFIDAVIT, mandatory: false,
+         notes: The society's affidavit / undertaking (to pay the premium, that the facts stated are true).}
+      - {key: RULES_2019.REQ.OCCUPANCY_CERTIFICATE, requirement_code: OCCUPANCY_CERTIFICATE, mandatory: false,
+         notes: Occupancy / completion certificate of the society's building.}
+      - {key: RULES_2019.REQ.CONVEYANCE_DEED, requirement_code: CONVEYANCE_DEED, mandatory: false,
+         notes: Registered conveyance of the building / land to the society.}
+
+    # What the AI checks inside each filed document. Write each one as a single plain sentence saying what a correct
+    # document shows, so "Not met: <text>" reads as the problem and "Correct the document: <text>" as the fix.
+    # slot = the upload it applies to (rci.intake.slots); "other" = any additional document — start those with "If this
+    # is …" so the AI answers not applicable for other kinds of document.
+    # Not repeated here (checked in code across documents): CTS / survey / area agree, the holder is the society, the
+    # occupancy class allows conversion, recency of the 7/12 / property card / tax receipt, tax arrears, the application
+    # is addressed to the Collector, the Aadhaar name matches the signatory.
+    # severity: problem = the case cannot go ahead as filed; warning = needs a look; info = worth noting.
+    document_checks:
+      # --- application to the Collector
+      - key: RULES_2019.DC.APPLICATION_ASKS_CONVERSION
+        code: APPLICATION_ASKS_FOR_CONVERSION
+        slot: application
+        text_en: The application asks for the land to be converted to Occupancy Class-I (from Occupancy Class-II or government lease).
+        text_mr: अर्जात जमीन भोगवटादार वर्ग-२ / शासकीय भाडेपट्ट्यावरून भोगवटादार वर्ग-१ मध्ये रूपांतरित करण्याची विनंती केली आहे.
+        severity: problem
+      - key: RULES_2019.DC.APPLICATION_SIGNED
+        code: APPLICATION_SIGNED_BY_OFFICE_BEARER
+        slot: application
+        text_en: The application is signed for the society by its chairman or secretary, with the designation written under the signature.
+        text_mr: अर्जावर संस्थेच्या वतीने अध्यक्ष किंवा सचिव यांची स्वाक्षरी असून स्वाक्षरीखाली पदनाम लिहिले आहे.
+        severity: problem
+      - key: RULES_2019.DC.APPLICATION_SOCIETY_DETAILS
+        code: APPLICATION_NAMES_SOCIETY_AND_REG_NO
+        slot: application
+        text_en: The application gives the society's full name and its co-operative society registration number.
+        text_mr: अर्जात संस्थेचे पूर्ण नाव व सहकारी संस्था नोंदणी क्रमांक दिला आहे.
+        severity: warning
+      - key: RULES_2019.DC.APPLICATION_LAND_DETAILS
+        code: APPLICATION_IDENTIFIES_LAND
+        slot: application
+        text_en: The application identifies the land by village and CTS or survey number, and states its area.
+        text_mr: अर्जात जमिनीचे गाव, न.भू.क्र. किंवा स.नं. आणि क्षेत्रफळ नमूद आहे.
+        severity: problem
+      - key: RULES_2019.DC.APPLICATION_DATED
+        code: APPLICATION_DATED
+        slot: application
+        text_en: The application is dated.
+        text_mr: अर्जावर दिनांक आहे.
+        severity: warning
+      - key: RULES_2019.DC.APPLICATION_ENCLOSURES
+        code: APPLICATION_LISTS_ENCLOSURES
+        slot: application
+        text_en: The application lists the documents enclosed with it.
+        text_mr: अर्जासोबत जोडलेल्या कागदपत्रांची यादी अर्जात दिली आहे.
+        severity: info
+      - key: RULES_2019.DC.APPLICATION_SEAL
+        code: APPLICATION_BEARS_SOCIETY_SEAL
+        slot: application
+        text_en: The application bears the society's seal (rubber stamp) next to the signature.
+        text_mr: अर्जावर स्वाक्षरीजवळ संस्थेचा शिक्का आहे.
+        severity: info
+      - key: RULES_2019.DC.APPLICATION_PREMIUM_UNDERTAKING
+        code: APPLICATION_AGREES_TO_PAY_PREMIUM
+        slot: application
+        text_en: The application says the society will pay the premium fixed under the rules.
+        text_mr: नियमानुसार निश्चित होणारे अधिमूल्य संस्था भरेल असे अर्जात नमूद आहे.
+        severity: info
+
+      # --- 7/12 extract
+      - key: RULES_2019.DC.SATBARA_NO_DISPUTE
+        code: SATBARA_NO_PENDING_DISPUTE
+        slot: satbara
+        text_en: The 7/12 extract records no pending dispute, court case or stay order on the land.
+        text_mr: ७/१२ उताऱ्यावर जमिनीबाबत प्रलंबित वाद, न्यायालयीन प्रकरण किंवा मनाई हुकूम नोंदलेला नाही.
+        severity: warning
+      - key: RULES_2019.DC.SATBARA_NO_GOVT_DUES
+        code: SATBARA_NO_GOVT_DUES
+        slot: satbara
+        text_en: The 7/12 extract records no unpaid government dues (शासकीय येणे) against the land.
+        text_mr: ७/१२ उताऱ्यावर जमिनीवर शासकीय येणे बाकी असल्याची नोंद नाही.
+        severity: warning
+      - key: RULES_2019.DC.SATBARA_CERTIFIED
+        code: SATBARA_CERTIFIED_COPY
+        slot: satbara
+        text_en: The 7/12 extract is a certified copy — signed and stamped by the Talathi, or digitally signed with a verification number.
+        text_mr: ७/१२ उतारा तलाठ्याची सही व शिक्क्यासह किंवा पडताळणी क्रमांकासह डिजिटल स्वाक्षरीत प्रमाणित प्रत आहे.
+        severity: warning
+      - key: RULES_2019.DC.SATBARA_MUTATION_ENTRIES
+        code: SATBARA_SHOWS_MUTATION_ENTRIES
+        slot: satbara
+        text_en: The 7/12 extract shows the mutation entry numbers (फेरफार क्रमांक) behind the occupant's name.
+        text_mr: ७/१२ उताऱ्यावर भोगवटादाराच्या नावामागील फेरफार क्रमांक दिसतात.
+        severity: info
+
+      # --- property card
+      - key: RULES_2019.DC.PROPERTY_CARD_TENURE
+        code: PROPERTY_CARD_STATES_TENURE
+        slot: property_card
+        text_en: The property card states the tenure (सत्ता प्रकार) of the land.
+        text_mr: मिळकत पत्रिकेवर जमिनीचा सत्ता प्रकार नमूद आहे.
+        severity: warning
+      - key: RULES_2019.DC.PROPERTY_CARD_NO_CHARGE
+        code: PROPERTY_CARD_NO_CHARGE
+        slot: property_card
+        text_en: The property card records no charge, mortgage or government dues (बोजा) on the land, or shows any such entry as cleared.
+        text_mr: मिळकत पत्रिकेवर जमिनीवर बोजा, गहाण किंवा शासकीय येणे नोंदलेले नाही, किंवा अशी नोंद कमी केल्याचे दाखवले आहे.
+        severity: warning
+      - key: RULES_2019.DC.PROPERTY_CARD_CERTIFIED
+        code: PROPERTY_CARD_CERTIFIED_COPY
+        slot: property_card
+        text_en: The property card is a certified copy — signed and stamped by the City Survey office, or digitally signed.
+        text_mr: मिळकत पत्रिका नगर भूमापन कार्यालयाची सही व शिक्क्यासह किंवा डिजिटल स्वाक्षरीत प्रमाणित प्रत आहे.
+        severity: warning
+      - key: RULES_2019.DC.PROPERTY_CARD_HOLDER_ENTRY
+        code: PROPERTY_CARD_SHOWS_HOLDER_ENTRY
+        slot: property_card
+        text_en: The property card shows the entry (नोंद / फेरफार) by which the society became the holder, with its date.
+        text_mr: संस्था धारक झाल्याची नोंद / फेरफार दिनांकासह मिळकत पत्रिकेवर दिसते.
+        severity: warning
+
+      # --- original grant / lease
+      - key: RULES_2019.DC.GRANT_BY_GOVERNMENT
+        code: GRANT_ISSUED_BY_GOVERNMENT
+        slot: grant
+        text_en: The grant, allotment order or lease was issued by the Government or the Collector to the society (or its promoters).
+        text_mr: अनुदान / वाटप आदेश / भाडेपट्टा शासन किंवा जिल्हाधिकारी यांनी संस्थेस (किंवा प्रवर्तकांना) दिला आहे.
+        severity: problem
+      - key: RULES_2019.DC.GRANT_REFERENCE
+        code: GRANT_HAS_ORDER_NO_AND_DATE
+        slot: grant
+        text_en: The grant carries an order or reference number and a date.
+        text_mr: अनुदान आदेशावर आदेश / संदर्भ क्रमांक व दिनांक आहे.
+        severity: warning
+      - key: RULES_2019.DC.GRANT_PURPOSE
+        code: GRANT_FOR_HOUSING
+        slot: grant
+        text_en: The grant says the land was given for housing (a co-operative housing society or residential use).
+        text_mr: जमीन गृहनिर्माण (सहकारी गृहनिर्माण संस्था / निवासी वापर) यासाठी दिल्याचे अनुदानात नमूद आहे.
+        severity: warning
+      - key: RULES_2019.DC.GRANT_CONDITIONS
+        code: GRANT_CONDITIONS_NOT_BREACHED
+        slot: grant
+        text_en: The grant records no breach of its conditions (transfer, change of use or sub-division without the Collector's permission).
+        text_mr: अनुदानातील अटींचा (परवानगीशिवाय हस्तांतरण, वापर बदल, पोटविभाजन) भंग झाल्याची नोंद नाही.
+        severity: warning
+      - key: RULES_2019.DC.LEASE_TERMS
+        code: LEASE_PERIOD_AND_RENT_STATED
+        slot: grant
+        text_en: The lease deed states the lease period and the annual lease rent.
+        text_mr: भाडेपट्टा करारनाम्यात भाडेपट्ट्याचा कालावधी व वार्षिक भाडे नमूद आहे.
+        severity: warning
+        condition: {tenure: govt_lease}
+      - key: RULES_2019.DC.LEASE_IN_FORCE
+        code: LEASE_IN_FORCE_OR_RENEWED
+        slot: grant
+        text_en: The lease period had not ended by the date of the application, or a renewal of the lease is shown.
+        text_mr: अर्जाच्या दिनांकास भाडेपट्ट्याचा कालावधी संपलेला नाही, किंवा भाडेपट्ट्याचे नूतनीकरण दाखवले आहे.
+        severity: warning
+        condition: {tenure: govt_lease}
+      - key: RULES_2019.DC.GRANT_SIGNED
+        code: GRANT_SIGNED_AND_SEALED
+        slot: grant
+        text_en: The grant is signed and sealed by the officer of the authority that issued it.
+        text_mr: अनुदान आदेशावर तो देणाऱ्या प्राधिकाऱ्याच्या अधिकाऱ्याची सही व शिक्का आहे.
+        severity: warning
+
+      # --- identity proof
+      - key: RULES_2019.DC.AADHAAR_LEGIBLE
+        code: AADHAAR_NAME_AND_NUMBER_LEGIBLE
+        slot: aadhaar
+        text_en: The card holder's name and Aadhaar number (full or masked) can be read.
+        text_mr: ओळखपत्रावरील धारकाचे नाव व आधार क्रमांक (पूर्ण किंवा अंशतः लपवलेला) वाचता येतो.
+        severity: warning
+      - key: RULES_2019.DC.AADHAAR_MASKED
+        code: AADHAAR_MASKED
+        slot: aadhaar
+        text_en: Only the last four digits of the Aadhaar number are shown (masked Aadhaar).
+        text_mr: आधार क्रमांकाचे फक्त शेवटचे चार अंक दिसतात (मास्क्ड आधार).
+        severity: info
+      - key: RULES_2019.DC.AADHAAR_PHOTO
+        code: AADHAAR_HAS_PHOTO
+        slot: aadhaar
+        text_en: The card shows the holder's photograph.
+        text_mr: ओळखपत्रावर धारकाचे छायाचित्र आहे.
+        severity: info
+
+      # --- property tax receipts
+      - key: RULES_2019.DC.TAX_RECEIPT_ISSUER
+        code: TAX_RECEIPT_FROM_LOCAL_BODY
+        slot: tax_receipts
+        text_en: The receipt is issued by the municipal corporation, municipal council or gram panchayat and has a receipt number.
+        text_mr: पावती महानगरपालिका / नगरपरिषद / ग्रामपंचायतीने दिलेली असून तिच्यावर पावती क्रमांक आहे.
+        severity: warning
+      - key: RULES_2019.DC.TAX_RECEIPT_PAYER
+        code: TAX_RECEIPT_IN_SOCIETY_NAME
+        slot: tax_receipts
+        text_en: The receipt is in the name of the society or its building.
+        text_mr: पावती संस्थेच्या किंवा संस्थेच्या इमारतीच्या नावे आहे.
+        severity: warning
+      - key: RULES_2019.DC.TAX_RECEIPT_PROPERTY_NO
+        code: TAX_RECEIPT_HAS_PROPERTY_NO
+        slot: tax_receipts
+        text_en: The receipt gives the property or assessment number it was paid for.
+        text_mr: पावतीवर कर भरलेल्या मालमत्तेचा मालमत्ता / कर आकारणी क्रमांक आहे.
+        severity: warning
+
+      # --- Index II
+      - key: RULES_2019.DC.INDEX_II_SOCIETY_PARTY
+        code: INDEX_II_SOCIETY_IS_PARTY
+        slot: index_ii
+        text_en: The society is a party to the registered transaction, normally as the purchaser or transferee.
+        text_mr: नोंदणीकृत व्यवहारात संस्था पक्षकार आहे (सहसा खरेदीदार / हस्तांतरिती).
+        severity: warning
+      - key: RULES_2019.DC.INDEX_II_PROPERTY
+        code: INDEX_II_DESCRIBES_PROPERTY
+        slot: index_ii
+        text_en: The Index II describes the property by CTS or survey number and village.
+        text_mr: सूची क्र. २ मध्ये मिळकतीचा न.भू.क्र. किंवा स.नं. व गाव नमूद आहे.
+        severity: warning
+      - key: RULES_2019.DC.INDEX_II_CERTIFIED
+        code: INDEX_II_CERTIFIED_COPY
+        slot: index_ii
+        text_en: The Index II is a certified copy from the Sub-Registrar's office, or an online copy with a verification number.
+        text_mr: सूची क्र. २ ही दुय्यम निबंधक कार्यालयाची प्रमाणित प्रत किंवा पडताळणी क्रमांकासह ऑनलाइन प्रत आहे.
+        severity: warning
+
+      # --- additional documents
+      - key: RULES_2019.DC.SGM_MAJORITY
+        code: SGM_RESOLUTION_MAJORITY
+        slot: other
+        text_en: If this is a general body resolution of the society, it resolves to apply for conversion to Occupancy Class-I and records that it was passed by a majority of the members present.
+        text_mr: सर्वसाधारण सभेच्या ठरावात भोगवटादार वर्ग-१ रूपांतरणासाठी अर्ज करण्याचा निर्णय उपस्थित सभासदांच्या बहुमताने मंजूर झाल्याची नोंद आहे.
+        severity: problem
+      - key: RULES_2019.DC.SGM_AUTHORISES
+        code: SGM_RESOLUTION_AUTHORISES_SIGNATORY
+        slot: other
+        text_en: If this is a general body resolution of the society, it names the office-bearer authorised to sign the application and pay the premium.
+        text_mr: सर्वसाधारण सभेच्या ठरावात अर्जावर स्वाक्षरी करण्यासाठी व अधिमूल्य भरण्यासाठी प्राधिकृत पदाधिकाऱ्याचे नाव आहे.
+        severity: warning
+      - key: RULES_2019.DC.NO_DUES_LEASE_RENT
+        code: NO_DUES_CERTIFICATE_CLEAR
+        slot: other
+        text_en: If this is a no-dues certificate for lease rent, it says no lease rent is outstanding and gives the date up to which it was checked.
+        text_mr: भाडेपट्टा थकबाकी नसल्याच्या दाखल्यात कोणतीही थकबाकी नसल्याचे व कोणत्या दिनांकापर्यंत तपासले ते नमूद आहे.
+        severity: warning
+        condition: {tenure: govt_lease}
+      - key: RULES_2019.DC.SGM_QUORUM
+        code: SGM_RESOLUTION_MEETING_AND_QUORUM
+        slot: other
+        text_en: If this is a general body resolution of the society, it gives the date of the meeting and records that the quorum was present.
+        text_mr: सर्वसाधारण सभेच्या ठरावात सभेचा दिनांक व गणपूर्ती असल्याची नोंद आहे.
+        severity: warning
+      - key: RULES_2019.DC.REGISTRATION_CERTIFICATE
+        code: REGISTRATION_CERTIFICATE_DETAILS
+        slot: other
+        text_en: If this is the society's registration certificate, it is issued by the Registrar of Co-operative Societies and gives the registration number and date.
+        text_mr: संस्था नोंदणी प्रमाणपत्र सहकारी संस्थांच्या निबंधकांनी दिलेले असून त्यावर नोंदणी क्रमांक व दिनांक आहे.
+        severity: warning
+      - key: RULES_2019.DC.MEMBER_LIST_CERTIFIED
+        code: MEMBER_LIST_CERTIFIED
+        slot: other
+        text_en: If this is a list of the society's members, it is signed and stamped by the society's chairman or secretary.
+        text_mr: संस्थेची सभासद यादी अध्यक्ष किंवा सचिव यांच्या सही व शिक्क्यासह प्रमाणित आहे.
+        severity: warning
+      - key: RULES_2019.DC.AFFIDAVIT_SWORN
+        code: AFFIDAVIT_ON_STAMP_PAPER_AND_SWORN
+        slot: other
+        text_en: If this is an affidavit or undertaking, it is on stamp paper and sworn before a notary or executive magistrate.
+        text_mr: प्रतिज्ञापत्र / हमीपत्र मुद्रांक कागदावर असून नोटरी किंवा कार्यकारी दंडाधिकारी यांच्यासमोर शपथपूर्वक केलेले आहे.
+        severity: warning
+      - key: RULES_2019.DC.OCCUPANCY_CERTIFICATE
+        code: OCCUPANCY_CERTIFICATE_ISSUED
+        slot: other
+        text_en: If this is an occupancy or completion certificate, it is issued by the planning authority for the society's building.
+        text_mr: भोगवटा / पूर्णत्व प्रमाणपत्र संस्थेच्या इमारतीसाठी नियोजन प्राधिकरणाने दिलेले आहे.
+        severity: warning
+      - key: RULES_2019.DC.CONVEYANCE_REGISTERED
+        code: CONVEYANCE_DEED_REGISTERED
+        slot: other
+        text_en: If this is a conveyance deed, it is registered, with the Sub-Registrar's document number and date on it.
+        text_mr: अभिहस्तांतरण पत्र नोंदणीकृत असून त्यावर दुय्यम निबंधकांचा दस्त क्रमांक व दिनांक आहे.
+        severity: warning
+
+    # What the society must do before the conversion order issues.
+    obligations:
+      - key: RULES_2019.OBL.PAY_PREMIUM
+        code: PAY_PREMIUM_BEFORE_ORDER
+        description_en: Pay the conversion premium into the government account before the order is issued.
+        description_mr: रूपांतरण आदेशापूर्वी अधिमूल्य शासन खात्यात जमा करणे.
+      - key: RULES_2019.OBL.LEASE_RENT
+        code: CLEAR_LEASE_RENT_ARREARS
+        description_en: Clear any lease-rent arrears (leasehold land only).
+        description_mr: भाडेपट्ट्याची थकबाकी भरणे (फक्त भाडेपट्ट्याची जमीन).
+        condition: {tenure: govt_lease}
+      - key: RULES_2019.OBL.CLEAR_DUES
+        code: CLEAR_GOVT_DUES
+        description_en: Pay any other government dues (शासकीय येणे) recorded against the land.
+        description_mr: जमिनीवर नोंदलेली इतर शासकीय येणी भरणे.
+      - key: RULES_2019.OBL.RECORDS_UPDATE
+        code: APPLY_FOR_RECORD_UPDATE
+        description_en: After the order, apply to have the 7/12 extract / property card show the land as Occupancy Class-I.
+        description_mr: आदेशानंतर ७/१२ उतारा / मिळकत पत्रिकेवर जमीन भोगवटादार वर्ग-१ अशी नोंद करण्यासाठी अर्ज करणे.

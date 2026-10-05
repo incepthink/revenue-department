@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "extraction/CTSO_REPORT.v1",
+  "title": "CTSO_REPORT extraction",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "inspection_date",
+    "cts_no",
+    "area_sqm",
+    "encroachment"
+  ],
+  "properties": {
+    "inspection_date": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "found",
+        "raw",
+        "page_seq"
+      ],
+      "properties": {
+        "found": {
+          "type": "boolean"
+        },
+        "raw": {
+          "type": "string",
+          "description": "Date of the site inspection / measurement"
+        },
+        "page_seq": {
+          "type": "integer"
+        }
+      }
+    },
+    "cts_no": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "found",
+        "raw",
+        "page_seq"
+      ],
+      "properties": {
+        "found": {
+          "type": "boolean"
+        },
+        "raw": {
+          "type": "string",
+          "description": "City survey (नगर भूमापन / CTS) number of the land"
+        },
+        "page_seq": {
+          "type": "integer"
+        }
+      }
+    },
+    "area_sqm": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "found",
+        "raw",
+        "page_seq"
+      ],
+      "properties": {
+        "found": {
+          "type": "boolean"
+        },
+        "raw": {
+          "type": "string",
+          "description": "Area found on site (sq m)"
+        },
+        "page_seq": {
+          "type": "integer"
+        }
+      }
+    },
+    "encroachment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "found",
+        "raw",
+        "page_seq"
+      ],
+      "properties": {
+        "found": {
+          "type": "boolean"
+        },
+        "raw": {
+          "type": "string",
+          "description": "Whether encroachment was found"
+        },
+        "page_seq": {
+          "type": "integer"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rci"
+version = "0.4.0"
+description = "Revenue Case Intelligence — CHS Occupancy Class-II to Class-I (Phase 4: drafting, backtest)"
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi>=0.115",
+  "uvicorn[standard]>=0.30",
+  "python-multipart>=0.0.9",
+  "sqlalchemy>=2.0",
+  "psycopg[binary]>=3.2",
+  "alembic>=1.13",
+  "pgvector>=0.3",
+  "pydantic>=2.7",
+  "pydantic-settings>=2.3",
+  "pyyaml>=6",
+  "jsonschema>=4.22",
+  "httpx>=0.27",
+  "openai>=1.40",
+  "pymupdf>=1.24",
+  "pillow>=10",
+  "cryptography>=42",
+  "presidio-analyzer>=2.2",
+  "arq>=0.26",
+  "redis>=5",
+  "azure-storage-blob>=12.20",
+  "pyjwt>=2.8",
+  "docxtpl>=0.18",
+  "python-docx>=1.1",
+  "lxml>=5",
+]
+
+[project.optional-dependencies]
+tesseract = ["pytesseract>=0.3.10"]
+dev = ["pytest>=8", "hypothesis>=6.100"]
+
+[project.scripts]
+rci = "rci.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+rci = ["seed/*.yaml"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["db: needs the Postgres test database (docker compose up db)"]

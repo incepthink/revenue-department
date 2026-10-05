@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "extraction/PROPERTY_CARD.v1",
+  "title": "PROPERTY_CARD extraction",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "cts_no",
+    "village",
+    "area_sqm",
+    "holder_name",
+    "tenure",
+    "issue_date"
+  ],
+  "properties": {
+    "cts_no": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "found",
+        "raw",
+        "page_seq"
+      ],
+      "properties": {
+        "found": {
+          "type": "boolean"
+        },
+        "raw": {
+          "type": "string",
+          "description": "City survey (नगर भूमापन / CTS) number of the land"
+        },
+        "page_seq": {
+          "type": "integer"
+        }
+      }
+    },
+    "village": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "found",
+        "raw",
+        "page_seq"
+      ],
+      "properties": {
+        "found": {
+          "type": "boolean"
+        },
+        "raw": {
+          "type": "string",
+          "description": "Village (मौजे) name"
+        },
+        "page_seq": {
+          "type": "integer"
+        }
+      }
+    },
+    "area_sqm": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "found",
+        "raw",
+        "page_seq"
+      ],
+      "properties": {
+        "found": {
+          "type": "boolean"
+        },
+        "raw": {
+          "type": "string",
+          "description": "Land area in square metres"
+        },
+        "page_seq": {
+          "type": "integer"
+        }
+      }
+    },
+    "holder_name": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "found",
+        "raw",
+        "page_seq"
+      ],
+      "properties": {
+        "found": {
+          "type": "boolean"
+        },
+        "raw": {
+          "type": "string",
+          "description": "Holder (धारक) as recorded"
+        },
+        "page_seq": {
+          "type": "integer"
+        }
+      }
+    },
+    "tenure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "found",
+        "raw",
+        "page_seq"
+      ],
+      "properties": {
+        "found": {
+          "type": "boolean"
+        },
+        "raw": {
+          "type": "string",
+          "description": "Tenure (धारणाधिकार / सत्ता प्रकार)"
+        },
+        "page_seq": {
+          "type": "integer"
+        }
+      }
+    },
+    "issue_date": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "found",
+        "raw",
+        "page_seq"
+      ],
+      "properties": {
+        "found": {
+          "type": "boolean"
+        },
+        "raw": {
+          "type": "string",
+          "description": "Date the certified copy was issued"
+        },
+        "page_seq": {
+          "type": "integer"
+        }
+      }
+    }
+  }
+}
