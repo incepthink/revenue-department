@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "extraction/COLLECTOR_ORDER.v1",
+  "title": "COLLECTOR_ORDER extraction",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "order_no",
+    "order_date",
+    "decision",
+    "premium_amount",
+    "cts_no",
+    "area_sqm"
+  ],
+  "properties": {
+    "order_no": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "found",
+        "raw",
+        "page_seq"
+      ],
+      "properties": {
+        "found": {
+          "type": "boolean"
+        },
+        "raw": {
+          "type": "string",
+          "description": "Order number"
+        },
+        "page_seq": {
+          "type": "integer"
+        }
+      }
+    },
+    "order_date": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "found",
+        "raw",
+        "page_seq"
+      ],
+      "properties": {
+        "found": {
+          "type": "boolean"
+        },
+        "raw": {
+          "type": "string",
+          "description": "Date of the order"
+        },
+        "page_seq": {
+          "type": "integer"
+        }
+      }
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "found",
+        "raw",
+        "page_seq"
+      ],
+      "properties": {
+        "found": {
+          "type": "boolean"
+        },
+        "raw": {
+          "type": "string",
+          "description": "Decision of the order"
+        },
+        "page_seq": {
+          "type": "integer"
+        }
+      }
+    },
+    "premium_amount": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "found",
+        "raw",
+        "page_seq"
+      ],
+      "properties": {
+        "found": {
+          "type": "boolean"
+        },
+        "raw": {
+          "type": "string",
+          "description": "Premium / nazrana amount"
+        },
+        "page_seq": {
+          "type": "integer"
+        }
+      }
+    },
+    "cts_no": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "found",
+        "raw",
+        "page_seq"
+      ],
+      "properties": {
+        "found": {
+          "type": "boolean"
+        },
+        "raw": {
+          "type": "string",
+          "description": "City survey (नगर भूमापन / CTS) number of the land"
+        },
+        "page_seq": {
+          "type": "integer"
+        }
+      }
+    },
+    "area_sqm": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "found",
+        "raw",
+        "page_seq"
+      ],
+      "properties": {
+        "found": {
+          "type": "boolean"
+        },
+        "raw": {
+          "type": "string",
+          "description": "Land area in square metres"
+        },
+        "page_seq": {
+          "type": "integer"
+        }
+      }
+    }
+  }
+}

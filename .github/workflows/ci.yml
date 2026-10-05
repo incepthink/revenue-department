@@ -1,0 +1,63 @@
+# CI: API tests, the backtest gate and the web build. The gate fails the run when a backtest metric regresses past its
+# tolerance against eval/backtest/baseline.json (config/backtest.yaml), when a draft leaks another case's reference,
+# or when a holdout reaches matching / tuning. Update the baseline only deliberately:
+#   python eval/backtest/ci_backtest.py --update-baseline   (then commit eval/backtest/baseline.json with the reason)
+name: ci
+
+on:
+  push:
+  pull_request:
+
+env:
+  PYTHONIOENCODING: utf-8
+  RCI_DATABASE_URL: postgresql+psycopg://rci:rci@localhost:5432/rci
+  RCI_TEST_DATABASE_URL: postgresql+psycopg://rci:rci@localhost:5432/rci_test
+  RCI_STORAGE_BACKEND: local
+  RCI_LLM_PROVIDER: none
+  RCI_EMBEDDING_PROVIDER: local
+  RCI_OCR_PRIMARY: none
+
+jobs:
+  api:
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: pgvector/pgvector:pg16
+        env: {POSTGRES_USER: rci, POSTGRES_PASSWORD: rci, POSTGRES_DB: rci}
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U rci -d rci" --health-interval 5s --health-timeout 3s --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12", cache: pip, cache-dependency-path: services/api/pyproject.toml}
+      - name: Install
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install -e "services/api[dev]"
+          .venv/bin/python -m rci.cli init-env
+      - name: Test database
+        run: |
+          PGPASSWORD=rci psql -h localhost -U rci -d rci -c "CREATE DATABASE rci_test"
+          for db in rci rci_test; do
+            PGPASSWORD=rci psql -h localhost -U rci -d $db -c "CREATE EXTENSION IF NOT EXISTS vector; CREATE EXTENSION IF NOT EXISTS pgcrypto; CREATE SCHEMA IF NOT EXISTS vault;"
+          done
+      - name: Tests
+        run: cd services/api && ../../.venv/bin/python -m pytest -q
+      - name: Backtest gate (20 synthetic holdouts, fresh database)
+        run: .venv/bin/python eval/backtest/ci_backtest.py --database-url postgresql+psycopg://rci:rci@localhost:5432/rci_ci
+      - name: Backtest report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with: {name: backtest-report, path: var/out/backtest/, if-no-files-found: ignore}
+      - name: Report in the job summary
+        if: always()
+        run: test -f var/out/backtest/backtest_synthetic.md && cat var/out/backtest/backtest_synthetic.md >> "$GITHUB_STEP_SUMMARY" || true
+
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: "22", cache: npm, cache-dependency-path: apps/web/package-lock.json}
+      - run: cd apps/web && npm ci && npx tsc --noEmit && npm run build

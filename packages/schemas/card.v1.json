@@ -1,0 +1,191 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "card.v1",
+  "title": "Case card v1 — CHS Occupancy Class-II / Govt lease → Class-I",
+  "type": "object",
+  "required": ["schema_version", "case", "pipeline_version", "status", "facts", "exhibits", "validations", "requirements", "events", "review"],
+  "additionalProperties": false,
+  "$defs": {
+    "fact": {
+      "description": "An extracted value with page-referenced evidence. `raw`/`snippet` are cut from the redacted page text.",
+      "type": ["object", "null"],
+      "required": ["value", "raw", "page_seq", "doc_page_no", "document", "snippet", "method", "confidence", "exhibit_id", "exhibit_type", "field"],
+      "properties": {
+        "value": {},
+        "raw": {"type": "string"},
+        "page_seq": {"type": "integer", "minimum": 1, "description": "Docket page number (1-based across all documents of the case)"},
+        "doc_page_no": {"type": "integer", "minimum": 1},
+        "document": {"type": "string"},
+        "page_id": {"type": ["string", "null"]},
+        "snippet": {"type": "string"},
+        "method": {"enum": ["rules", "llm", "rules+llm", "manual"]},
+        "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+        "alternatives": {"type": "array"},
+        "exhibit_id": {"type": "string"},
+        "exhibit_type": {"type": "string"},
+        "field": {"type": "string"}
+      }
+    },
+    "group": {"type": "object", "additionalProperties": {"$ref": "#/$defs/fact"}},
+    "stage": {"enum": ["filing", "query_response", "internal", "final"]}
+  },
+  "properties": {
+    "schema_version": {"const": "card.v1"},
+    "case": {
+      "type": "object",
+      "required": ["case_id", "case_ref", "office_code", "data_class", "case_type"],
+      "properties": {
+        "case_id": {"type": "string"},
+        "case_ref": {"type": "string"},
+        "office_code": {"type": "string"},
+        "data_class": {"enum": ["real", "synthetic"]},
+        "case_type": {"type": "string"}
+      }
+    },
+    "pipeline_version": {"type": "string"},
+    "status": {"enum": ["draft", "approved"]},
+    "facts": {
+      "type": "object",
+      "required": ["society", "land", "application", "property_card", "lease", "sgm", "demand", "order", "queries", "inspections", "payments"],
+      "properties": {
+        "society": {"$ref": "#/$defs/group"},
+        "land": {"$ref": "#/$defs/group"},
+        "application": {"$ref": "#/$defs/group"},
+        "property_card": {"$ref": "#/$defs/group"},
+        "lease": {"$ref": "#/$defs/group"},
+        "sgm": {"$ref": "#/$defs/group"},
+        "demand": {"$ref": "#/$defs/group"},
+        "order": {"$ref": "#/$defs/group"},
+        "queries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["exhibit_id", "letter_date", "ref_no", "items"],
+            "properties": {
+              "exhibit_id": {"type": "string"},
+              "letter_date": {"$ref": "#/$defs/fact"},
+              "ref_no": {"$ref": "#/$defs/fact"},
+              "items": {"type": "array", "items": {"$ref": "#/$defs/fact"}}
+            }
+          }
+        },
+        "inspections": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["exhibit_id", "kind"],
+            "properties": {
+              "exhibit_id": {"type": "string"},
+              "kind": {"enum": ["FIELD_REPORT", "CTSO_REPORT"]},
+              "inspection_date": {"$ref": "#/$defs/fact"},
+              "area_sqm": {"$ref": "#/$defs/fact"},
+              "cts_no": {"$ref": "#/$defs/fact"},
+              "encroachment": {"$ref": "#/$defs/fact"}
+            }
+          }
+        },
+        "payments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["exhibit_id"],
+            "properties": {
+              "exhibit_id": {"type": "string"},
+              "grn": {"$ref": "#/$defs/fact"},
+              "payment_date": {"$ref": "#/$defs/fact"},
+              "amount": {"$ref": "#/$defs/fact"},
+              "head_of_account": {"$ref": "#/$defs/fact"}
+            }
+          }
+        }
+      }
+    },
+    "exhibits": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["exhibit_id", "seq", "type", "stage", "pages", "page_range", "confidence", "classification_method"],
+        "properties": {
+          "exhibit_id": {"type": "string"},
+          "seq": {"type": "integer"},
+          "type": {"type": "string"},
+          "stage": {"$ref": "#/$defs/stage"},
+          "pages": {"type": "array", "items": {"type": "integer", "minimum": 1}, "minItems": 1},
+          "page_range": {"type": "string"},
+          "confidence": {"type": "number"},
+          "classification_method": {"type": "string"},
+          "doc_date": {"type": ["string", "null"], "format": "date"}
+        }
+      }
+    },
+    "validations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["code", "status", "message", "evidence", "parameters", "depends_on_unverified"],
+        "properties": {
+          "code": {"type": "string"},
+          "status": {"enum": ["pass", "fail", "not_evaluable"]},
+          "message": {"type": "string"},
+          "evidence": {"type": "array"},
+          "parameters": {"type": "array", "items": {"type": "object", "required": ["key", "value", "status"]}},
+          "depends_on_unverified": {"type": "boolean"},
+          "details": {"type": "object"}
+        }
+      }
+    },
+    "requirements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["code", "status", "satisfied_by_exhibit_id", "was_queried_in", "evidence", "catalog_status"],
+        "properties": {
+          "code": {"type": "string"},
+          "status": {"enum": ["present", "missing", "invalid", "queried", "waived", "not_applicable"]},
+          "satisfied_by_exhibit_id": {"type": ["string", "null"]},
+          "was_queried_in": {"type": ["string", "null"]},
+          "evidence": {"type": "array"},
+          "catalog_status": {"enum": ["verified", "to_verify"]}
+        }
+      }
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["code", "seq", "date", "exhibit_id", "evidence"],
+        "properties": {
+          "code": {"type": "string"},
+          "seq": {"type": "integer"},
+          "date": {"type": ["string", "null"], "format": "date"},
+          "exhibit_id": {"type": "string"},
+          "evidence": {"$ref": "#/$defs/fact"}
+        }
+      }
+    },
+    "review": {
+      "type": "object",
+      "required": ["open_issues"],
+      "properties": {"open_issues": {"type": "array"}}
+    },
+    "summary": {
+      "description": "Templated facts summary (approved cards only). Built from structured facts, never free text.",
+      "type": "object",
+      "required": ["mr", "en"],
+      "properties": {"mr": {"type": "string"}, "en": {"type": "string"}}
+    },
+    "approval": {
+      "description": "Present on approved cards.",
+      "type": "object",
+      "required": ["approved_by", "approved_at", "review_mode", "base_card_version"],
+      "properties": {
+        "approved_by": {"type": "string"},
+        "approved_at": {"type": "string"},
+        "review_mode": {"enum": ["single", "double"]},
+        "review_round": {"type": "integer"},
+        "base_card_version": {"type": "integer"},
+        "reviewers": {"type": "array", "items": {"type": "string"}}
+      }
+    }
+  }
+}

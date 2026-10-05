@@ -1,0 +1,7 @@
+year,division,district,taluka,village,zone,sub_zone,cts_range,land_rate_per_sqm,residential_rate_per_sqm,commercial_rate_per_sqm,source_ref,status
+2024,Pune,पुणे,हवेली,कोथरूड,12,12/1,,48500,98200,121500,SYNTHETIC SAMPLE — not a real ASR figure,to_verify
+2024,Pune,पुणे,हवेली,एरंडवणे,14,14/2,,52300,104600,130800,SYNTHETIC SAMPLE — not a real ASR figure,to_verify
+2024,Pune,पुणे,हवेली,बाणेर,22,22/1,,39800,81200,99500,SYNTHETIC SAMPLE — not a real ASR figure,to_verify
+2025,Pune,पुणे,हवेली,कोथरूड,12,12/1,,50900,103100,127600,SYNTHETIC SAMPLE — not a real ASR figure,to_verify
+2025,Pune,पुणे,हवेली,एरंडवणे,14,14/2,,54900,109800,137300,SYNTHETIC SAMPLE — not a real ASR figure,to_verify
+2025,Pune,पुणे,हवेली,बाणेर,22,22/1,,41800,85300,104500,SYNTHETIC SAMPLE — not a real ASR figure,to_verify

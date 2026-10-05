@@ -1,0 +1,62 @@
+# Intelligence engine (Phase 3): precedent matching, gap analysis, next steps. Engineering parameters (ours to
+# tune), not department facts. `rci tune --save` writes tuned `weights` / `support_threshold` to
+# config/intel_tuned.yaml, which overrides the defaults below (this file keeps its comments).
+
+recall:
+  per_facet_k: 50        # pgvector nearest neighbours per facet (facts / documents / issues); union = candidates
+  top_k: 10              # precedents shown and used for gap / step support
+
+filters:                 # SQL hard filters on the precedent pool (always on: approved + locked card, not the case itself)
+  roles: [precedent, unassigned]   # never holdout (backtest) or incoming
+  same_data_class: true            # real cases are matched against real precedents only
+  same_case_type: true
+  exclude_same_society: true       # a society's own earlier / parallel files are not precedents for it
+  time_travel: true                # only precedents decided on or before `as_of` (case_embeddings.as_of)
+
+# Rerank: score = Σ weight × feature / Σ weight; every feature is in [0, 1] (0.5 = unknown / neutral).
+weights:
+  sim_facts: 1.0         # cosine of the facts facet vectors
+  sim_documents: 0.5     # cosine of the documents facet vectors
+  sim_issues: 1.0        # cosine of the issues facet vectors
+  tenure: 1.5            # same holding basis (Class-II vs Government lease)
+  location: 0.5          # same village (1) / taluka (0.6) / district (0.3)
+  area: 0.4              # 1 − |ln(area ratio)| / ln 4
+  regime: 0.8            # same rule stack at the precedent's rule date as at the query's (Jaccard of rule-set codes)
+  recency: 0.3           # exp(−years apart / 5)
+  validations: 0.7       # Jaccard of failed validators
+  gaps: 1.0              # Jaccard of open requirement codes (query) vs queried / missing codes (precedent)
+
+support_threshold: 0.5   # weighted share of applicable precedents needing a requirement before it is a gap
+min_support_cases: 2     # ... and at least this many applicable precedents
+step_threshold: 0.4      # weighted event frequency before an event becomes a next step (unless a rule / fact triggers it)
+
+explanations:
+  llm: true              # Marathi wording by the configured LLM (codes post-checked); template otherwise
+
+# Rule obligations → the next step that discharges them.
+obligation_steps:
+  PAY_PREMIUM_BEFORE_ORDER: [DEMAND_ISSUED, PREMIUM_PAID]
+  SITE_INSPECTION_BEFORE_ORDER: [FIELD_INSPECTION_DONE]
+  CLEAR_LEASE_RENT_ARREARS: [LEASE_RENT_DUES_CHECK]
+
+# Fact triggers: case facts that call for a step regardless of precedent frequency.
+fact_triggers:
+  - code: AREA_MISMATCH
+    when: {validator_failed: AREA_TOLERANCE}
+    step: CTSO_MEASUREMENT_DONE
+    reason_en: Areas on the documents differ beyond tolerance — get a City Survey Officer measurement.
+    reason_mr: कागदपत्रांवरील क्षेत्रात तफावत — नगर भूमापन अधिकाऱ्यांकडून मोजणी करून घ्यावी.
+  - code: LEASEHOLD
+    when: {tenure: govt_lease}
+    step: LEASE_RENT_DUES_CHECK
+    reason_en: Government leasehold land — check lease-rent dues before the order.
+    reason_mr: शासकीय भाडेपट्ट्याची जमीन — आदेशापूर्वी भाडेपट्टा थकबाकी तपासावी.
+  - code: ENCROACHMENT
+    when: {encroachment: true}
+    step: FIELD_INSPECTION_DONE
+    reason_en: Encroachment reported — confirm the position on site.
+    reason_mr: अतिक्रमण नमूद — स्थळ पाहणीद्वारे स्थिती निश्चित करावी.
+
+# Steps that are not events in the event catalog.
+extra_steps:
+  LEASE_RENT_DUES_CHECK: {name_en: Lease-rent dues check, name_mr: भाडेपट्टा थकबाकी तपासणी, actor: office, typical_order: 55}

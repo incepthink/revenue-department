@@ -1,0 +1,132 @@
+{
+  "case_ref": "DKT-002",
+  "notes": "Govt lease, pending: stale property card held by an individual, SGM after application, area mismatch.",
+  "page_count": 9,
+  "exhibits": [
+    {
+      "type": "APPLICATION",
+      "stage": "filing",
+      "pages": [
+        1,
+        1
+      ],
+      "document": "01_arj.pdf"
+    },
+    {
+      "type": "LEASE_SANAD",
+      "stage": "filing",
+      "pages": [
+        2,
+        3
+      ],
+      "document": "01_arj.pdf"
+    },
+    {
+      "type": "PROPERTY_CARD",
+      "stage": "filing",
+      "pages": [
+        4,
+        4
+      ],
+      "document": "02_kagadpatre.pdf"
+    },
+    {
+      "type": "SGM_RESOLUTION",
+      "stage": "filing",
+      "pages": [
+        5,
+        5
+      ],
+      "document": "02_kagadpatre.pdf"
+    },
+    {
+      "type": "MEMBER_LIST",
+      "stage": "filing",
+      "pages": [
+        6,
+        6
+      ],
+      "document": "02_kagadpatre.pdf"
+    },
+    {
+      "type": "FIELD_REPORT",
+      "stage": "internal",
+      "pages": [
+        7,
+        7
+      ],
+      "document": "03_karyalay.pdf"
+    },
+    {
+      "type": "CTSO_REPORT",
+      "stage": "internal",
+      "pages": [
+        8,
+        8
+      ],
+      "document": "03_karyalay.pdf"
+    },
+    {
+      "type": "QUERY_LETTER",
+      "stage": "internal",
+      "pages": [
+        9,
+        9
+      ],
+      "document": "03_karyalay.pdf"
+    }
+  ],
+  "facts": {
+    "society.name": "गणेश कृपा सहकारी गृहनिर्माण संस्था मर्यादित",
+    "land.cts_no": "567",
+    "land.village": "एरंडवणे",
+    "land.area_sqm": "800.00",
+    "land.tenure": "govt_lease",
+    "application.date": "2025-01-15",
+    "lease.lease_date": "1972-08-10",
+    "lease.lease_period_years": 99,
+    "lease.annual_rent": "1200.00",
+    "sgm.meeting_date": "2025-01-20",
+    "property_card.issue_date": "2023-06-01",
+    "inspections.0.area_sqm": "842.00",
+    "inspections.0.encroachment": true,
+    "inspections.1.area_sqm": "841.50",
+    "inspections.1.inspection_date": "2025-03-05",
+    "queries.0.items.count": 4
+  },
+  "validations": {
+    "CTS_MATCH": "pass",
+    "AREA_TOLERANCE": "fail",
+    "HOLDER_IS_SOCIETY": "fail",
+    "SGM_DATE_ORDER": "fail",
+    "PROPERTY_CARD_RECENCY": "fail"
+  },
+  "requirements": {
+    "PROPERTY_CARD_RECENT": "invalid",
+    "SGM_RESOLUTION": "invalid",
+    "NO_DUES_LEASE_RENT": "queried",
+    "LEASE_OR_GRANT_DOCUMENT": "present",
+    "CTSO_MEASUREMENT": "present",
+    "PREMIUM_PAYMENT": "missing"
+  },
+  "events": [
+    "APPLICATION_FILED",
+    "FIELD_INSPECTION_DONE",
+    "CTSO_MEASUREMENT_DONE",
+    "QUERY_ISSUED"
+  ],
+  "pii_values": [
+    "032104567890",
+    "ganeshkrupa.chs@gmail.com",
+    "9822045678",
+    "7890 1234 5603",
+    "8901 2345 6713",
+    "9420011223",
+    "7030044556",
+    "मोहन शंकर कुलकर्णी",
+    "Rajesh K. Nair",
+    "विठ्ठल रामचंद्र जोशी",
+    "गोविंद हरी आपटे",
+    "कविता अरुण भिडे"
+  ]
+}
