@@ -1,0 +1,56 @@
+# Drafting (Phase 4). Office format and wording are department facts: every item carries a status and stays
+# to_verify until the pilot office confirms it (letterhead / format samples were not available in the session).
+# Values are Jinja strings rendered with the draft's slots (see `rci clauses slots`) and the Marathi filters.
+
+font:
+  value: Nirmala UI            # Unicode Devanagari font set on every run (ascii / hAnsi / cs); Mangal / Noto Sans Devanagari also work
+  status: to_verify
+font_size_pt: {value: 12, status: to_verify}
+
+letterhead:
+  value: ["जिल्हाधिकारी कार्यालय, {{ district }}", "(महसूल शाखा)"]
+  status: to_verify
+ref_format:                    # the case's own file number; never another case's
+  value: "महसूल/कक्ष-२/रूपांतर/{{ case_ref }}"
+  status: to_verify
+letter_date:                   # today = date the draft is generated (officer edits); blank = leave for the officer
+  value: today
+  status: to_verify
+addressee:
+  value: ["अध्यक्ष / सचिव,", "{{ society_name }},", "नगर भूमापन क्रमांक {{ cts_no|mr_num }}, मौजे {{ village }}, ता. {{ taluka }}, जि. {{ district }}."]
+  status: to_verify
+signatory:
+  letter: {value: ["उपजिल्हाधिकारी (महसूल)", "करिता जिल्हाधिकारी, {{ district }}"], status: to_verify}
+  order: {value: ["जिल्हाधिकारी, {{ district }}"], status: to_verify}
+  note: {value: ["लिपिक", "अव्वल कारकून", "नायब तहसीलदार (महसूल)", "उपजिल्हाधिकारी (महसूल)"], status: to_verify}
+collector_title: {value: "जिल्हाधिकारी, {{ district }}", status: to_verify}
+
+reply_days: {value: 30, status: to_verify}           # time allowed to comply with a query letter
+payment_days: {value: 30, status: to_verify}         # time allowed to pay the demanded premium
+premium_head_of_account: {value: "0029-00-800-01", status: to_verify}
+
+# Marathi names of the rule sets as cited in orders (rule_sets.name is English).
+rule_set_names_mr:
+  status: to_verify
+  value:
+    RULES_2019: महाराष्ट्र जमीन महसूल (भोगवटादार वर्ग-२ व भाडेपट्ट्याने दिलेल्या जमिनींचे भोगवटादार वर्ग-१ मध्ये रूपांतरण) नियम, २०१९
+
+validator_names_mr:
+  CTS_MATCH: नगर भूमापन क्रमांकाची जुळणी
+  AREA_TOLERANCE: कागदपत्रांवरील क्षेत्राची जुळणी
+  HOLDER_IS_SOCIETY: मिळकत पत्रिकेवर संस्थेचे नाव धारक म्हणून
+  SGM_DATE_ORDER: विशेष सर्वसाधारण सभेचा दिनांक (अर्जापूर्वी)
+  PROPERTY_CARD_RECENCY: मिळकत पत्रिकेचा अद्ययावतपणा
+
+query_letter:
+  include_bases: [STATUTORY, PRACTICE, PRACTICE_OLD_RULES]   # SUPERSEDED gaps go to the internal notes only
+
+narrative:
+  llm: true                    # Marathi recital re-worded by the configured LLM, then cross-checked; template otherwise
+
+clauses:
+  cluster_threshold: 0.8       # cosine of the delexicalised wording; mined clauses at or above it share a cluster (engineering)
+
+watermark: AI-सहाय्यित मसुदा
+internal_header: "AI-सहाय्यित मसुदा — अंतर्गत वापरासाठी; अधिकृत प्रत नाही"
+templates_dir: config/templates   # docx templates (`rci build-templates` regenerates them; editable in Word)

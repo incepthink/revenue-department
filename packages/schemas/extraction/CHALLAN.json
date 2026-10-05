@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "extraction/CHALLAN.v1",
+  "title": "CHALLAN extraction",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "grn",
+    "payment_date",
+    "amount",
+    "head_of_account"
+  ],
+  "properties": {
+    "grn": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "found",
+        "raw",
+        "page_seq"
+      ],
+      "properties": {
+        "found": {
+          "type": "boolean"
+        },
+        "raw": {
+          "type": "string",
+          "description": "GRAS GRN number"
+        },
+        "page_seq": {
+          "type": "integer"
+        }
+      }
+    },
+    "payment_date": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "found",
+        "raw",
+        "page_seq"
+      ],
+      "properties": {
+        "found": {
+          "type": "boolean"
+        },
+        "raw": {
+          "type": "string",
+          "description": "Payment / challan date"
+        },
+        "page_seq": {
+          "type": "integer"
+        }
+      }
+    },
+    "amount": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "found",
+        "raw",
+        "page_seq"
+      ],
+      "properties": {
+        "found": {
+          "type": "boolean"
+        },
+        "raw": {
+          "type": "string",
+          "description": "Amount paid"
+        },
+        "page_seq": {
+          "type": "integer"
+        }
+      }
+    },
+    "head_of_account": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "found",
+        "raw",
+        "page_seq"
+      ],
+      "properties": {
+        "found": {
+          "type": "boolean"
+        },
+        "raw": {
+          "type": "string",
+          "description": "Budget head of account"
+        },
+        "page_seq": {
+          "type": "integer"
+        }
+      }
+    }
+  }
+}

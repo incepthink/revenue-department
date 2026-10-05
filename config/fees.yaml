@@ -1,0 +1,41 @@
+# Fee engine parameters (premium / nazrana for Class-II / Government lease → Class-I).
+# Every value is a department fact until confirmed in writing, so all are `to_verify`; a fee computed with any
+# to_verify parameter is reported as "unverified" (never as a final figure). Rates are NOT here: they live on the
+# rule slabs (rules layer) and the ASR table.
+parameters:
+  rule_date_basis:
+    value: application_date
+    status: to_verify
+    options: [application_date, order_date, payment_date]
+    notes: >
+      Which date selects the rule stack and the amnesty / concession window (open question 8). Falls back to the
+      analysis date when the chosen date is not on the card yet (e.g. no order for an incoming case).
+  asr_year_basis:
+    value: application_date
+    status: to_verify
+    options: [application_date, order_date, demand_date]
+    notes: Which date picks the ASR (annual statement of rates) year; the ASR year starts on 1 April (open question 10).
+  asr_rate_column:
+    value: {residential: land_rate_per_sqm, commercial: land_rate_per_sqm}
+    status: to_verify
+    notes: >
+      ASR column per land use. The sample demand letters apply the open-land rate; whether built-up
+      (residential / commercial) rates apply to CHS premises is unconfirmed (open question 10).
+  area_basis:
+    value: [property_card, ctso_measured, application, lease]
+    status: to_verify
+    notes: >
+      Area to charge, first available wins: property card, CTSO measurement, application, lease deed.
+      Whether a CTSO-measured area replaces the property-card area after a mismatch is unconfirmed.
+  rounding:
+    value: {mode: ROUND_HALF_UP, unit: "1"}
+    status: to_verify
+    notes: Rounding of the total (unit in rupees; e.g. "1", "10", "100"). Intermediate values are kept exact.
+  default_land_use:
+    value: residential
+    status: to_verify
+    notes: The card has no land-use field yet; CHS premises are assumed residential unless the case says otherwise.
+  premium_heads:
+    value: ["0029-00-800"]
+    status: to_verify
+    notes: Challan head-of-account prefixes that count as the premium payment (the golden check sums these).

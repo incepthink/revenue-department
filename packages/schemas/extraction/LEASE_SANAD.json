@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "extraction/LEASE_SANAD.v1",
+  "title": "LEASE_SANAD extraction",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "lease_date",
+    "lessee",
+    "cts_no",
+    "area_sqm",
+    "lease_period_years",
+    "annual_rent"
+  ],
+  "properties": {
+    "lease_date": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "found",
+        "raw",
+        "page_seq"
+      ],
+      "properties": {
+        "found": {
+          "type": "boolean"
+        },
+        "raw": {
+          "type": "string",
+          "description": "Date of the lease deed / sanad"
+        },
+        "page_seq": {
+          "type": "integer"
+        }
+      }
+    },
+    "lessee": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "found",
+        "raw",
+        "page_seq"
+      ],
+      "properties": {
+        "found": {
+          "type": "boolean"
+        },
+        "raw": {
+          "type": "string",
+          "description": "Lessee (the society)"
+        },
+        "page_seq": {
+          "type": "integer"
+        }
+      }
+    },
+    "cts_no": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "found",
+        "raw",
+        "page_seq"
+      ],
+      "properties": {
+        "found": {
+          "type": "boolean"
+        },
+        "raw": {
+          "type": "string",
+          "description": "City survey (नगर भूमापन / CTS) number of the land"
+        },
+        "page_seq": {
+          "type": "integer"
+        }
+      }
+    },
+    "area_sqm": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "found",
+        "raw",
+        "page_seq"
+      ],
+      "properties": {
+        "found": {
+          "type": "boolean"
+        },
+        "raw": {
+          "type": "string",
+          "description": "Land area in square metres"
+        },
+        "page_seq": {
+          "type": "integer"
+        }
+      }
+    },
+    "lease_period_years": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "found",
+        "raw",
+        "page_seq"
+      ],
+      "properties": {
+        "found": {
+          "type": "boolean"
+        },
+        "raw": {
+          "type": "string",
+          "description": "Lease period in years"
+        },
+        "page_seq": {
+          "type": "integer"
+        }
+      }
+    },
+    "annual_rent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "found",
+        "raw",
+        "page_seq"
+      ],
+      "properties": {
+        "found": {
+          "type": "boolean"
+        },
+        "raw": {
+          "type": "string",
+          "description": "Annual lease rent"
+        },
+        "page_seq": {
+          "type": "integer"
+        }
+      }
+    }
+  }
+}

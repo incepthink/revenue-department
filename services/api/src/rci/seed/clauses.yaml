@@ -1,0 +1,187 @@
+# Seed clause library (Phase 4): canonical wording for every section of the four drafts, so drafts render before any
+# precedent clause has been curated. Modelled on the format of the sample dockets (DKT-001 / 002 / 003). Loaded by
+# `rci seed` as origin=seed, status=canonical, verification=to_verify, data_class=any. Curated clauses (mined from
+# precedents and edited in Admin → Clauses) of the same key win over these when their conditions match as well.
+#
+#   key          clause key the drafts ask for (query_item.<REQUIREMENT_CODE> for query-letter items)
+#   kind         scrutiny_note | query_letter | demand_letter | collector_order
+#   template     Jinja with slots (`rci clauses slots` lists them) and the filters mr_num, inr, mr_words, mr_rupees,
+#                mr_date. No literal digits: every number / date comes from a slot.
+#   conditions   optional: tenure, validator_failed, premium_paid, has_query_letter, fee_status (most specific match wins)
+#   rule_sets    optional: rule-set codes the wording belongs to (empty = any rule stack)
+catalog_version: 1
+clauses:
+  # ---------------------------------------------------------------- scrutiny note (छाननी टिप्पणी)
+  - key: note.subject
+    kind: scrutiny_note
+    template: "{{ society_name }}, मौजे {{ village }}, ता. {{ taluka }}, जि. {{ district }} येथील नगर भूमापन क्रमांक {{ cts_no|mr_num }} ही जमीन भोगवटादार वर्ग-१ मध्ये रूपांतरित करण्याबाबत."
+  - key: note.intro
+    kind: scrutiny_note
+    template: "उपरोक्त विषयान्वये संस्थेचा अर्ज दिनांक {{ application_date|mr_date }} रोजी या कार्यालयास प्राप्त झाला आहे. अर्जाची व सोबतच्या कागदपत्रांची छाननी करून खालीलप्रमाणे टिप्पणी सादर करण्यात येत आहे."
+  - key: note.proposal.query
+    kind: scrutiny_note
+    template: "अर्जातील वरील त्रुटींची पूर्तता करण्याबाबत संस्थेस त्रुटी पत्र पाठविण्यास मान्यता असावी. त्रुटी पत्राचा मसुदा मान्यतेसाठी सोबत सादर."
+  - key: note.proposal.demand
+    kind: scrutiny_note
+    template: "अर्ज व कागदपत्रे परिपूर्ण असल्याने, वरीलप्रमाणे परिगणित नजराणा रक्कम शासन जमा करण्यासाठी संस्थेस मागणी पत्र पाठविण्यास मान्यता असावी. मागणी पत्राचा मसुदा मान्यतेसाठी सोबत सादर."
+  - key: note.proposal.fee_pending
+    kind: scrutiny_note
+    template: "अर्ज व कागदपत्रे परिपूर्ण आहेत; तथापि नजराणा रकमेच्या परिगणनेसाठी आवश्यक माहिती निश्चित झाल्यानंतर मागणी पत्र पाठविण्यात येईल."
+  - key: note.proposal.order
+    kind: scrutiny_note
+    template: "संस्थेने देय नजराणा रक्कम शासन जमा केली असल्याने, जमीन भोगवटादार वर्ग-१ मध्ये रूपांतरित करण्याबाबतचा आदेश निर्गमित करण्यास मान्यता असावी. आदेशाचा मसुदा मान्यतेसाठी सोबत सादर."
+  - key: note.closing
+    kind: scrutiny_note
+    template: "सविनय सादर."
+
+  # ---------------------------------------------------------------- query letter (त्रुटी पत्र)
+  - key: query.subject
+    kind: query_letter
+    conditions: {tenure: govt_lease}
+    template: "भाडेपट्ट्याने दिलेली शासकीय जमीन भोगवटादार वर्ग-१ मध्ये रूपांतरित करण्याबाबत."
+  - key: query.subject
+    kind: query_letter
+    template: "भोगवटादार वर्ग-२ मधील जमीन भोगवटादार वर्ग-१ मध्ये रूपांतरित करण्याबाबत."
+  - key: query.reference
+    kind: query_letter
+    template: "आपला अर्ज दिनांक {{ application_date|mr_date }}."
+  - key: query.intro
+    kind: query_letter
+    template: "उपरोक्त संदर्भीय अर्जाची छाननी केली असता खालील त्रुटी आढळून आल्या आहेत :"
+  - key: query_item.PROPERTY_CARD_RECENT
+    kind: query_letter
+    conditions: {validator_failed: HOLDER_IS_SOCIETY}
+    template: "अद्ययावत मिळकत पत्रिका सादर करावी; सध्याच्या मिळकत पत्रिकेवर संस्थेचे नाव धारक म्हणून नमूद नाही."
+  - key: query_item.PROPERTY_CARD_RECENT
+    kind: query_letter
+    conditions: {validator_failed: PROPERTY_CARD_RECENCY}
+    template: "अद्ययावत मिळकत पत्रिका सादर करावी; सादर केलेली मिळकत पत्रिका दिनांक {{ property_card_date|mr_date }} ची असून ती अद्ययावत नाही."
+  - key: query_item.PROPERTY_CARD_RECENT
+    kind: query_letter
+    template: "अद्ययावत मिळकत पत्रिका सादर करावी."
+  - key: query_item.SGM_RESOLUTION
+    kind: query_letter
+    conditions: {validator_failed: SGM_DATE_ORDER}
+    template: "विशेष सर्वसाधारण सभा दिनांक {{ sgm_date|mr_date }} रोजी म्हणजे अर्जाच्या दिनांकानंतर घेतल्याने, रूपांतरणास मान्यता देणारा सुधारित ठराव सादर करावा."
+  - key: query_item.SGM_RESOLUTION
+    kind: query_letter
+    template: "जमीन भोगवटादार वर्ग-१ मध्ये रूपांतरित करण्यास मान्यता देणारा विशेष सर्वसाधारण सभेचा ठराव सादर करावा."
+  - key: query_item.MEMBER_LIST
+    kind: query_letter
+    template: "संस्थेच्या सभासदांची यादी सचिवांच्या स्वाक्षरीने प्रमाणित करून सादर करावी."
+  - key: query_item.SOCIETY_REGISTRATION
+    kind: query_letter
+    template: "संस्था नोंदणी प्रमाणपत्राची साक्षांकित प्रत सादर करावी."
+  - key: query_item.OCCUPANCY_CERTIFICATE
+    kind: query_letter
+    template: "इमारतीचे भोगवटा प्रमाणपत्र सादर करावे."
+  - key: query_item.UNDERTAKING_AFFIDAVIT
+    kind: query_letter
+    template: "संस्थेचे विहित नमुन्यातील प्रतिज्ञापत्र / हमीपत्र सादर करावे."
+  - key: query_item.NO_DUES_LEASE_RENT
+    kind: query_letter
+    template: "भाडेपट्टा रकमेची कोणतीही थकबाकी नसल्याचा दाखला सादर करावा."
+  - key: query_item.LEASE_OR_GRANT_DOCUMENT
+    kind: query_letter
+    template: "मूळ भाडेपट्टा करारनामा / सनद / जमीन वाटप आदेशाची प्रत सादर करावी."
+  - key: query_item.APPLICATION_FORM
+    kind: query_letter
+    template: "संस्थेचा विहित नमुन्यातील स्वाक्षरीत अर्ज सादर करावा."
+  - key: query_item.CONVEYANCE_DEED
+    kind: query_letter
+    template: "संस्थेच्या नावे झालेल्या अभिहस्तांतरण पत्राची प्रत सादर करावी."
+  - key: query_item.PREMIUM_PAYMENT
+    kind: query_letter
+    template: "या कार्यालयाच्या मागणी पत्रानुसार देय नजराणा रक्कम शासन जमा करून चलनाची प्रत सादर करावी."
+  - key: query_item.generic
+    kind: query_letter
+    template: "{{ requirement_name_mr }} सादर करावे."
+  - key: query.closing
+    kind: query_letter
+    template: "तरी वरील त्रुटींची पूर्तता हे पत्र मिळाल्यापासून {{ reply_days|mr_words }} दिवसांत करावी, अन्यथा उपलब्ध कागदपत्रांच्या आधारे प्रकरणी निर्णय घेण्यात येईल याची नोंद घ्यावी."
+
+  # ---------------------------------------------------------------- demand letter (मागणी पत्र)
+  - key: demand.subject
+    kind: demand_letter
+    template: "नजराणा रक्कम शासन जमा करण्याबाबत."
+  - key: demand.reference
+    kind: demand_letter
+    template: "आपला अर्ज दिनांक {{ application_date|mr_date }}."
+  - key: demand.intro
+    kind: demand_letter
+    conditions: {tenure: govt_lease}
+    template: "उपरोक्त विषयान्वये आपल्या संस्थेस भाडेपट्ट्याने दिलेली मौजे {{ village }} येथील नगर भूमापन क्रमांक {{ cts_no|mr_num }} ही शासकीय जमीन भोगवटादार वर्ग-१ मध्ये रूपांतरित करण्यासाठी देय नजराणा रक्कम खालीलप्रमाणे निश्चित करण्यात आली आहे :"
+  - key: demand.intro
+    kind: demand_letter
+    template: "उपरोक्त विषयान्वये आपल्या संस्थेची मौजे {{ village }} येथील नगर भूमापन क्रमांक {{ cts_no|mr_num }} ही जमीन भोगवटादार वर्ग-२ मधून भोगवटादार वर्ग-१ मध्ये रूपांतरित करण्यासाठी देय नजराणा रक्कम खालीलप्रमाणे निश्चित करण्यात आली आहे :"
+  - key: demand.payment_instruction
+    kind: demand_letter
+    template: "सदर रक्कम हे पत्र मिळाल्यापासून {{ payment_days|mr_words }} दिवसांत लेखाशीर्ष {{ head_of_account|mr_num }} खाली शासन जमा करावी व चलनाची प्रत या कार्यालयास सादर करावी."
+  - key: demand.lease_rent_note
+    kind: demand_letter
+    conditions: {tenure: govt_lease}
+    template: "तसेच भाडेपट्ट्याची कोणतीही थकबाकी असल्यास ती रक्कम स्वतंत्रपणे शासन जमा करावी."
+  - key: demand.closing
+    kind: demand_letter
+    template: "विहित मुदतीत रक्कम जमा न केल्यास नियमानुसार पुढील कार्यवाही करण्यात येईल."
+
+  # ---------------------------------------------------------------- collector order (जिल्हाधिकारी आदेश)
+  - key: order.read.application
+    kind: collector_order
+    template: "{{ society_name }} यांचा अर्ज दिनांक {{ application_date|mr_date }}."
+  - key: order.read.query_letter
+    kind: collector_order
+    template: "या कार्यालयाचे त्रुटी पत्र दिनांक {{ query_date|mr_date }}."
+  - key: order.read.query_reply
+    kind: collector_order
+    template: "संस्थेचे त्रुटी पूर्तता पत्र दिनांक {{ reply_date|mr_date }}."
+  - key: order.read.field_report
+    kind: collector_order
+    template: "तलाठी, सजा {{ village }} यांचा स्थळ पाहणी अहवाल दिनांक {{ inspection_date|mr_date }}."
+  - key: order.read.ctso_report
+    kind: collector_order
+    template: "नगर भूमापन अधिकारी यांचा मोजणी अहवाल दिनांक {{ ctso_date|mr_date }}."
+  - key: order.read.demand_letter
+    kind: collector_order
+    template: "या कार्यालयाचे मागणी पत्र दिनांक {{ demand_date|mr_date }}."
+  - key: order.read.challan
+    kind: collector_order
+    template: "संस्थेने शासन जमा केलेले चलन (GRN {{ grn }}) दिनांक {{ payment_date|mr_date }}."
+  - key: order.whereas.application
+    kind: collector_order
+    conditions: {tenure: govt_lease}
+    template: "ज्याअर्थी, {{ society_name }} यांनी मौजे {{ village }}, ता. {{ taluka }}, जि. {{ district }} येथील नगर भूमापन क्रमांक {{ cts_no|mr_num }}, क्षेत्र {{ area_sqm|mr_num }} चौ.मी. ही शासनाकडून भाडेपट्ट्याने मिळालेली जमीन भोगवटादार वर्ग-१ मध्ये रूपांतरित करण्याबाबत अर्ज केला आहे;"
+  - key: order.whereas.application
+    kind: collector_order
+    template: "ज्याअर्थी, {{ society_name }} यांनी मौजे {{ village }}, ता. {{ taluka }}, जि. {{ district }} येथील नगर भूमापन क्रमांक {{ cts_no|mr_num }}, क्षेत्र {{ area_sqm|mr_num }} चौ.मी. ही भोगवटादार वर्ग-२ म्हणून धारण केलेली जमीन भोगवटादार वर्ग-१ मध्ये रूपांतरित करण्याबाबत अर्ज केला आहे;"
+  - key: order.whereas.facts
+    kind: collector_order
+    template: "आणि ज्याअर्थी, प्रकरणातील वस्तुस्थिती पुढीलप्रमाणे आहे : {{ narrative }}"
+  - key: order.whereas.payment
+    kind: collector_order
+    template: "आणि ज्याअर्थी, संस्थेने देय नजराणा रक्कम रु. {{ paid_amount|inr|mr_num }}/- ({{ paid_amount|mr_rupees }}) दिनांक {{ payment_date|mr_date }} रोजी चलनाद्वारे शासन जमा केली आहे;"
+  - key: order.operative
+    kind: collector_order
+    template: "त्याअर्थी, मी, {{ collector_title }}, {{ rule_name_mr }} मधील तरतुदींनुसार मला प्राप्त झालेल्या अधिकारानुसार याद्वारे सदर जमीन भोगवटादार वर्ग-१ मध्ये रूपांतरित करण्यास परवानगी देत आहे."
+  - key: order.condition.mutation
+    kind: collector_order
+    template: "मिळकत पत्रिकेवरील धारणाधिकाराची नोंद भोगवटादार वर्ग-१ अशी करण्यात यावी."
+  - key: order.condition.use
+    kind: collector_order
+    template: "सदर जमिनीचा वापर निवासी प्रयोजनासाठीच करण्यात यावा."
+  - key: order.condition.lease_rent
+    kind: collector_order
+    conditions: {tenure: govt_lease}
+    template: "भाडेपट्ट्याची कोणतीही थकबाकी असल्यास ती संस्थेने शासन जमा करणे बंधनकारक राहील."
+  - key: order.condition.breach
+    kind: collector_order
+    template: "वरील अटींचा भंग झाल्यास सदर आदेश रद्द करण्याचा अधिकार राखून ठेवण्यात येत आहे."
+  - key: order.copy_to.ctso
+    kind: collector_order
+    template: "नगर भूमापन अधिकारी, {{ district }} यांना मिळकत पत्रिकेवर नोंद घेण्यासाठी."
+  - key: order.copy_to.tahsildar
+    kind: collector_order
+    template: "तहसीलदार, {{ taluka }} यांना माहितीसाठी."
+  - key: order.copy_to.society
+    kind: collector_order
+    template: "{{ society_name }} यांना माहितीसाठी व पुढील कार्यवाहीसाठी."

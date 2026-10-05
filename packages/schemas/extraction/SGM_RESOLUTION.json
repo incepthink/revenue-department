@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "extraction/SGM_RESOLUTION.v1",
+  "title": "SGM_RESOLUTION extraction",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "society_name",
+    "meeting_date",
+    "resolution_no",
+    "members_present",
+    "members_total"
+  ],
+  "properties": {
+    "society_name": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "found",
+        "raw",
+        "page_seq"
+      ],
+      "properties": {
+        "found": {
+          "type": "boolean"
+        },
+        "raw": {
+          "type": "string",
+          "description": "Full name of the cooperative housing society"
+        },
+        "page_seq": {
+          "type": "integer"
+        }
+      }
+    },
+    "meeting_date": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "found",
+        "raw",
+        "page_seq"
+      ],
+      "properties": {
+        "found": {
+          "type": "boolean"
+        },
+        "raw": {
+          "type": "string",
+          "description": "Date of the special general meeting"
+        },
+        "page_seq": {
+          "type": "integer"
+        }
+      }
+    },
+    "resolution_no": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "found",
+        "raw",
+        "page_seq"
+      ],
+      "properties": {
+        "found": {
+          "type": "boolean"
+        },
+        "raw": {
+          "type": "string",
+          "description": "Resolution number"
+        },
+        "page_seq": {
+          "type": "integer"
+        }
+      }
+    },
+    "members_present": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "found",
+        "raw",
+        "page_seq"
+      ],
+      "properties": {
+        "found": {
+          "type": "boolean"
+        },
+        "raw": {
+          "type": "string",
+          "description": "Members present"
+        },
+        "page_seq": {
+          "type": "integer"
+        }
+      }
+    },
+    "members_total": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "found",
+        "raw",
+        "page_seq"
+      ],
+      "properties": {
+        "found": {
+          "type": "boolean"
+        },
+        "raw": {
+          "type": "string",
+          "description": "Total members of the society"
+        },
+        "page_seq": {
+          "type": "integer"
+        }
+      }
+    }
+  }
+}

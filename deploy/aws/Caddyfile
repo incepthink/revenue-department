@@ -1,0 +1,13 @@
+# Automatic HTTPS (Let's Encrypt) for the API. RCI_API_HOST is e.g. 13-200-1-2.sslip.io (resolves to the Elastic IP).
+{$RCI_API_HOST} {
+	encode gzip
+	request_body {
+		max_size 200MB
+	}
+	reverse_proxy api:8000 {
+		transport http {
+			read_timeout 10m
+			write_timeout 10m
+		}
+	}
+}

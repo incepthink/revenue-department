@@ -1,0 +1,12 @@
+# Pilot office. PLACEHOLDER — the actual pilot office details were not supplied in Phase 1;
+# status stays to_verify until confirmed.
+offices:
+  - code: PILOT
+    name: Collector Office (pilot) — placeholder
+    name_mr: जिल्हाधिकारी कार्यालय (पायलट)
+    division: Pune
+    district: Pune
+    taluka: null
+    address: null
+    is_pilot: true
+    status: to_verify

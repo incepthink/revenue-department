@@ -1,0 +1,42 @@
+# 20-case backtest (Phase 4). Engineering settings, not department facts.
+
+holdouts:
+  n: 20
+  seed: 7
+  strata: [tenure, era]          # proportional allocation (largest remainder) over these; ≥ 1 per non-empty stratum
+  eras: ["2023-03-27"]           # era boundaries on the application date (the 2023 amendment)
+
+report_by: [tenure, era, decision, queried]   # per-stratum breakdown in the report
+
+# Fee world per data class. database = the rules layer + imported ASR table (real cases).
+# synthetic_5pct = the invented 5 % slab and ASR rates the synthetic pool was generated with (rci.intel.synthetic),
+# applied in memory, so fee metrics on synthetic data measure the engine rather than the missing department rates.
+fee_world:
+  real: database
+  synthetic: synthetic_5pct
+
+drafts: check                    # check = render all four drafts per holdout (both modes) and leak-check them; store; off
+
+gate:
+  baseline_file: eval/backtest/baseline.json
+  min_holdouts: 20
+  fail_on_tuning_leak: true      # tuned weights whose tuning set contains a holdout make the run invalid
+  absolute:                      # must hold on every run
+    leak_failures: {max: 0}
+    draft_render_ok_rate: {min: 1.0}
+    holdout_leaks: {max: 0}
+  regression:                    # compared with the baseline (tolerance in the metric's own unit)
+    query_f1: {direction: higher, tolerance: 0.02}
+    query_recall: {direction: higher, tolerance: 0.02}
+    query_precision: {direction: higher, tolerance: 0.03}
+    first_letter_completeness: {direction: higher, tolerance: 0.02}
+    statutory_false_negatives: {direction: lower, tolerance: 0}
+    steps_f1: {direction: higher, tolerance: 0.02}
+    kendall_tau: {direction: higher, tolerance: 0.05}
+    fee_exact_match_rate: {direction: higher, tolerance: 0.0}
+    fee_mean_abs_pct_error: {direction: lower, tolerance: 0.5}
+    fee_coverage: {direction: higher, tolerance: 0.0}
+    adjudicated_precision: {direction: higher, tolerance: 0.03}   # skipped while no officer adjudications exist
+    p_at_5: {direction: higher, tolerance: 0.05}                  # skipped while no officer relevance labels exist
+    ndcg_at_5: {direction: higher, tolerance: 0.05}
+    draft_rating_mean: {direction: higher, tolerance: 0.25}       # skipped while no draft ratings exist

@@ -1,0 +1,200 @@
+{
+  "case_ref": "DKT-001",
+  "notes": "Clean Class-II case, one query cycle, granted.",
+  "page_count": 15,
+  "exhibits": [
+    {
+      "type": "APPLICATION",
+      "stage": "filing",
+      "pages": [
+        1,
+        2
+      ],
+      "document": "docket.pdf"
+    },
+    {
+      "type": "SOCIETY_REG_CERT",
+      "stage": "filing",
+      "pages": [
+        3,
+        3
+      ],
+      "document": "docket.pdf"
+    },
+    {
+      "type": "PROPERTY_CARD",
+      "stage": "filing",
+      "pages": [
+        4,
+        4
+      ],
+      "document": "docket.pdf"
+    },
+    {
+      "type": "SGM_RESOLUTION",
+      "stage": "filing",
+      "pages": [
+        5,
+        5
+      ],
+      "document": "docket.pdf"
+    },
+    {
+      "type": "MEMBER_LIST",
+      "stage": "filing",
+      "pages": [
+        6,
+        6
+      ],
+      "document": "docket.pdf"
+    },
+    {
+      "type": "AFFIDAVIT",
+      "stage": "filing",
+      "pages": [
+        7,
+        7
+      ],
+      "document": "docket.pdf"
+    },
+    {
+      "type": "QUERY_LETTER",
+      "stage": "internal",
+      "pages": [
+        8,
+        8
+      ],
+      "document": "docket.pdf"
+    },
+    {
+      "type": "QUERY_REPLY",
+      "stage": "query_response",
+      "pages": [
+        9,
+        9
+      ],
+      "document": "docket.pdf"
+    },
+    {
+      "type": "OCCUPANCY_CERT",
+      "stage": "query_response",
+      "pages": [
+        10,
+        10
+      ],
+      "document": "docket.pdf"
+    },
+    {
+      "type": "FIELD_REPORT",
+      "stage": "internal",
+      "pages": [
+        11,
+        11
+      ],
+      "document": "docket.pdf"
+    },
+    {
+      "type": "DEMAND_LETTER",
+      "stage": "internal",
+      "pages": [
+        12,
+        12
+      ],
+      "document": "docket.pdf"
+    },
+    {
+      "type": "CHALLAN",
+      "stage": "final",
+      "pages": [
+        13,
+        13
+      ],
+      "document": "docket.pdf"
+    },
+    {
+      "type": "COLLECTOR_ORDER",
+      "stage": "final",
+      "pages": [
+        14,
+        15
+      ],
+      "document": "docket.pdf"
+    }
+  ],
+  "facts": {
+    "society.name": "सुयोग सहकारी गृहनिर्माण संस्था मर्यादित",
+    "society.registration_no": "PNA/HSG/(TC)/1234/1998-99",
+    "land.cts_no": "1234/अ",
+    "land.village": "कोथरूड",
+    "land.taluka": "हवेली",
+    "land.district": "पुणे",
+    "land.area_sqm": "1250.50",
+    "land.tenure": "occupancy_class_2",
+    "application.date": "2024-02-05",
+    "property_card.issue_date": "2024-01-20",
+    "sgm.meeting_date": "2024-01-12",
+    "sgm.resolution_no": "3",
+    "sgm.members_present": 36,
+    "sgm.members_total": 48,
+    "demand.letter_date": "2024-05-20",
+    "demand.amount": "4564325.00",
+    "order.order_date": "2024-06-28",
+    "order.decision": "granted",
+    "order.premium_amount": "4564325.00",
+    "payments.0.amount": "4564325.00",
+    "payments.0.grn": "MH004512345678202425",
+    "payments.0.payment_date": "2024-06-10",
+    "inspections.0.area_sqm": "1248.00",
+    "inspections.0.inspection_date": "2024-04-15",
+    "inspections.0.encroachment": false,
+    "queries.0.letter_date": "2024-03-11",
+    "queries.0.items.count": 2
+  },
+  "validations": {
+    "CTS_MATCH": "pass",
+    "AREA_TOLERANCE": "pass",
+    "HOLDER_IS_SOCIETY": "pass",
+    "SGM_DATE_ORDER": "pass",
+    "PROPERTY_CARD_RECENCY": "pass"
+  },
+  "requirements": {
+    "APPLICATION_FORM": "present",
+    "MEMBER_LIST": "present",
+    "OCCUPANCY_CERTIFICATE": "present",
+    "LEASE_OR_GRANT_DOCUMENT": "missing",
+    "PREMIUM_PAYMENT": "present",
+    "NO_DUES_LEASE_RENT": "not_applicable",
+    "CTSO_MEASUREMENT": "not_applicable"
+  },
+  "events": [
+    "APPLICATION_FILED",
+    "QUERY_ISSUED",
+    "QUERY_REPLIED",
+    "FIELD_INSPECTION_DONE",
+    "DEMAND_ISSUED",
+    "PREMIUM_PAID",
+    "ORDER_ISSUED"
+  ],
+  "pii_values": [
+    "5678 1234 9018",
+    "4567 1289 0341",
+    "2345 6789 0124",
+    "3456 7890 1238",
+    "6789 0123 4518",
+    "9822012345",
+    "9890123456",
+    "9765432109",
+    "9922334455",
+    "8806612345",
+    "BQKPP4821M",
+    "sunita.patil84@gmail.com",
+    "रमेश गणपत देशपांडे",
+    "सुनिता विजय पाटील",
+    "प्रकाश नारायण जोशी",
+    "आशा दिलीप मोरे",
+    "अनिल दत्तात्रय जोशी",
+    "मेघा सुरेश कुलकर्णी",
+    "संजय मारुती शिंदे",
+    "दिनेश बाबूराव गायकवाड"
+  ]
+}
