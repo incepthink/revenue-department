@@ -1,0 +1,60 @@
+# Written by `rci tune --save` (leave-one-out on precedents). Overrides config/intel.yaml for cases of
+# data class synthetic; delete this file to go back to the defaults.
+tuned:
+  at: '2026-09-27T08:50:34+00:00'
+  eval_run_id: d60079f1-292b-49ca-82bb-89da8c06c9a8
+  n_cases: 36
+  data_class: synthetic
+  objective:
+    f1: 0.8472
+    ndcg5: 0.6475
+    default_f1: 0.8188
+  cases:
+  - SYN-P-004
+  - SYN-P-006
+  - SYN-P-009
+  - SYN-P-012
+  - SYN-P-013
+  - SYN-P-014
+  - SYN-P-015
+  - SYN-P-016
+  - SYN-P-017
+  - SYN-P-019
+  - SYN-P-020
+  - SYN-P-021
+  - SYN-P-022
+  - SYN-P-023
+  - SYN-P-025
+  - SYN-P-027
+  - SYN-P-029
+  - SYN-P-030
+  - SYN-P-034
+  - SYN-P-035
+  - SYN-P-036
+  - SYN-P-038
+  - SYN-P-039
+  - SYN-P-040
+  - SYN-P-042
+  - SYN-P-043
+  - SYN-P-044
+  - SYN-P-045
+  - SYN-P-046
+  - SYN-P-047
+  - SYN-P-048
+  - SYN-P-050
+  - SYN-P-052
+  - SYN-P-055
+  - SYN-P-058
+  - SYN-P-060
+support_threshold: 0.6
+weights:
+  sim_facts: 1.0
+  sim_documents: 0.5
+  sim_issues: 1.0
+  tenure: 0.75
+  location: 0.25
+  area: 0.4
+  regime: 0.8
+  recency: 0.3
+  validations: 1.05
+  gaps: 2.0

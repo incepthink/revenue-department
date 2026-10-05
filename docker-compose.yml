@@ -1,0 +1,80 @@
+name: rci
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: rci
+      POSTGRES_PASSWORD: rci
+      POSTGRES_DB: rci
+    ports:
+      - "5434:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./infra/postgres/init.sql:/docker-entrypoint-initdb.d/00-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rci -d rci"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite
+    command: azurite-blob --blobHost 0.0.0.0 --blobPort 10000 --loose --skipApiVersionCheck
+    ports:
+      - "10000:10000"
+    volumes:
+      - azurite:/data
+
+  # Application containers are optional for local dev (run them on the host with `make api` / `make worker`).
+  api:
+    profiles: ["app"]
+    build:
+      context: .
+      dockerfile: infra/docker/python.Dockerfile
+    command: uvicorn rci.api.main:app --host 0.0.0.0 --port 8000
+    env_file: .env
+    environment:
+      RCI_DATABASE_URL: postgresql+psycopg://rci:rci@db:5432/rci
+      RCI_REDIS_URL: redis://redis:6379/0
+      RCI_STORAGE_BACKEND: azurite
+      RCI_AZURE_STORAGE_CONNECTION_STRING: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;"
+      RCI_PIPELINE_MODE: queue
+    ports:
+      - "8000:8000"
+    depends_on:
+      db: {condition: service_healthy}
+      redis: {condition: service_healthy}
+      azurite: {condition: service_started}
+
+  worker:
+    profiles: ["app"]
+    build:
+      context: .
+      dockerfile: infra/docker/python.Dockerfile
+    command: arq worker.WorkerSettings
+    working_dir: /app/services/worker
+    env_file: .env
+    environment:
+      RCI_DATABASE_URL: postgresql+psycopg://rci:rci@db:5432/rci
+      RCI_REDIS_URL: redis://redis:6379/0
+      RCI_STORAGE_BACKEND: azurite
+      RCI_AZURE_STORAGE_CONNECTION_STRING: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;"
+    depends_on:
+      db: {condition: service_healthy}
+      redis: {condition: service_healthy}
+      azurite: {condition: service_started}
+
+volumes:
+  pgdata:
+  azurite:

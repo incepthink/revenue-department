@@ -1,0 +1,209 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "extraction/APPLICATION.v1",
+  "title": "APPLICATION extraction",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "society_name",
+    "registration_no",
+    "cts_no",
+    "village",
+    "taluka",
+    "district",
+    "area_sqm",
+    "application_date",
+    "tenure"
+  ],
+  "properties": {
+    "society_name": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "found",
+        "raw",
+        "page_seq"
+      ],
+      "properties": {
+        "found": {
+          "type": "boolean"
+        },
+        "raw": {
+          "type": "string",
+          "description": "Full name of the cooperative housing society"
+        },
+        "page_seq": {
+          "type": "integer"
+        }
+      }
+    },
+    "registration_no": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "found",
+        "raw",
+        "page_seq"
+      ],
+      "properties": {
+        "found": {
+          "type": "boolean"
+        },
+        "raw": {
+          "type": "string",
+          "description": "Society registration number"
+        },
+        "page_seq": {
+          "type": "integer"
+        }
+      }
+    },
+    "cts_no": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "found",
+        "raw",
+        "page_seq"
+      ],
+      "properties": {
+        "found": {
+          "type": "boolean"
+        },
+        "raw": {
+          "type": "string",
+          "description": "City survey (नगर भूमापन / CTS) number of the land"
+        },
+        "page_seq": {
+          "type": "integer"
+        }
+      }
+    },
+    "village": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "found",
+        "raw",
+        "page_seq"
+      ],
+      "properties": {
+        "found": {
+          "type": "boolean"
+        },
+        "raw": {
+          "type": "string",
+          "description": "Village (मौजे) name"
+        },
+        "page_seq": {
+          "type": "integer"
+        }
+      }
+    },
+    "taluka": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "found",
+        "raw",
+        "page_seq"
+      ],
+      "properties": {
+        "found": {
+          "type": "boolean"
+        },
+        "raw": {
+          "type": "string",
+          "description": "Taluka"
+        },
+        "page_seq": {
+          "type": "integer"
+        }
+      }
+    },
+    "district": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "found",
+        "raw",
+        "page_seq"
+      ],
+      "properties": {
+        "found": {
+          "type": "boolean"
+        },
+        "raw": {
+          "type": "string",
+          "description": "District"
+        },
+        "page_seq": {
+          "type": "integer"
+        }
+      }
+    },
+    "area_sqm": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "found",
+        "raw",
+        "page_seq"
+      ],
+      "properties": {
+        "found": {
+          "type": "boolean"
+        },
+        "raw": {
+          "type": "string",
+          "description": "Land area in square metres"
+        },
+        "page_seq": {
+          "type": "integer"
+        }
+      }
+    },
+    "application_date": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "found",
+        "raw",
+        "page_seq"
+      ],
+      "properties": {
+        "found": {
+          "type": "boolean"
+        },
+        "raw": {
+          "type": "string",
+          "description": "Date of the application letter"
+        },
+        "page_seq": {
+          "type": "integer"
+        }
+      }
+    },
+    "tenure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "found",
+        "raw",
+        "page_seq"
+      ],
+      "properties": {
+        "found": {
+          "type": "boolean"
+        },
+        "raw": {
+          "type": "string",
+          "description": "Current tenure of the land"
+        },
+        "page_seq": {
+          "type": "integer"
+        }
+      }
+    }
+  }
+}

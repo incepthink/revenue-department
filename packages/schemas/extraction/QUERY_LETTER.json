@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "extraction/QUERY_LETTER.v1",
+  "title": "QUERY_LETTER extraction",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "letter_date",
+    "ref_no",
+    "query_items"
+  ],
+  "properties": {
+    "letter_date": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "found",
+        "raw",
+        "page_seq"
+      ],
+      "properties": {
+        "found": {
+          "type": "boolean"
+        },
+        "raw": {
+          "type": "string",
+          "description": "Date of the query letter"
+        },
+        "page_seq": {
+          "type": "integer"
+        }
+      }
+    },
+    "ref_no": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "found",
+        "raw",
+        "page_seq"
+      ],
+      "properties": {
+        "found": {
+          "type": "boolean"
+        },
+        "raw": {
+          "type": "string",
+          "description": "Outward (जावक) reference number"
+        },
+        "page_seq": {
+          "type": "integer"
+        }
+      }
+    },
+    "query_items": {
+      "type": "array",
+      "description": "Each numbered deficiency the applicant must comply with",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "found",
+          "raw",
+          "page_seq"
+        ],
+        "properties": {
+          "found": {
+            "type": "boolean"
+          },
+          "raw": {
+            "type": "string",
+            "description": "Each numbered deficiency the applicant must comply with"
+          },
+          "page_seq": {
+            "type": "integer"
+          }
+        }
+      }
+    }
+  }
+}
