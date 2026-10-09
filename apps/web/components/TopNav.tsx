@@ -4,6 +4,7 @@ import Icon from "./Icon";
 
 const LINKS = [
   { href: "/", label: "Cases", icon: "folder", on: (p: string) => p === "/" || p.startsWith("/cases") },
+  { href: "/library/search", label: "GR search", icon: "search", on: (p: string) => p.startsWith("/library") },
   { href: "/admin/rules", label: "Rules", icon: "book", on: (p: string) => p.startsWith("/admin/rules") },
 ] as const;
 

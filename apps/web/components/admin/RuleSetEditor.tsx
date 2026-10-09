@@ -1,21 +1,31 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
-import { STATUS_COLOUR } from "@/lib/api";
+import { STATUS_COLOUR, sourceHref, type GrSource } from "@/lib/api";
 import { get, send } from "@/lib/client";
 import Icon from "../Icon";
 
-type Row = Record<string, unknown> & { id: string; status: string; seed_key: string | null; source_ref: string | null };
+type Row = Record<string, unknown> & { id: string; status: string; seed_key: string | null; source_ref: string | null;
+                                       source?: GrSource | null };
 type CatalogDoc = { code: string; name_en: string; name_mr: string | null; category: string; intake_slot: string | null };
 type Slot = { key: string; label: string; label_mr: string };
 type RuleSet = {
   id: string; code: string; name: string; kind: string; notification_ref: string | null; notification_date: string | null;
   effective_from: string; effective_to: string | null; supersedes_code: string | null; status: string; notes: string | null;
-  source_filename: string | null; has_source: boolean;
-  slabs: Row[]; requirements: Row[]; obligations: Row[]; adjustments: Row[]; document_checks: Row[];
+  source_filename: string | null; has_source: boolean; source?: GrSource | null;
+  slabs: Row[]; authorities?: Row[]; requirements: Row[]; obligations: Row[]; adjustments: Row[]; document_checks: Row[];
   catalog: CatalogDoc[]; slots: Slot[];
 };
 type Table = "slabs" | "requirements" | "obligations" | "adjustments" | "document_checks";
 type Act = (fn: () => Promise<unknown>, ok?: string) => Promise<void>;
+
+// The GR provision a rule comes from: opens the library page with the rule's words marked.
+function GrSourceChip({ src }: { src?: GrSource | null }) {
+  if (!src) return null;
+  if (!src.found) return <span className="pill status lvl-warning" title={src.quote ?? undefined}>{src.doc_key}: not in the library</span>;
+  const href = sourceHref({ document_id: src.document_id, provision_id: src.provision_id, page_no: src.page_no, quote: src.quote });
+  return href ? <a className="cite-chip" href={href} target="_blank" rel="noreferrer" title={src.quote ?? undefined}>
+    {src.doc_key}{src.label ? ` ${src.label}` : ""}{src.page_no ? ` · p.${src.page_no}` : ""}</a> : null;
+}
 
 // Which land a row applies to: the only fact rule conditions are decided on at intake is the tenure.
 const APPLIES: [string, string][] = [["", "All land"], ["govt_lease", "Leasehold land only"], ["occupancy_class_2", "Class-II land only"]];
@@ -115,7 +125,9 @@ export default function RuleSetEditor({ id }: { id: string }) {
           <b>Notification</b>
           {rs.has_source
             ? <a href={`/api/rci/admin/rule-sets/${id}/source`} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>{rs.source_filename}</a>
-            : <span className="pill status lvl-warning">not uploaded — needed before anything here can be verified</span>}
+            : rs.source?.found
+              ? <a className="cite-chip" href={`/library/${rs.source.document_id}`} onClick={(e) => e.stopPropagation()}>GR library {rs.source.doc_key}</a>
+              : <span className="pill status lvl-warning">not uploaded — needed before anything here can be verified</span>}
         </summary>
         <div className="grid2" style={{ marginTop: 16, paddingTop: 16, borderTop: "1px solid var(--line)" }}>
           <div className="stack">
@@ -238,7 +250,7 @@ export default function RuleSetEditor({ id }: { id: string }) {
                       </div>
                     </td>
                     <td><AppliesTo row={r} disabled={busy} onSave={(c) => patchRow("obligations", r, { condition: c })} /></td>
-                    <td><Text value={r.source_ref} disabled={busy} width={140} placeholder="clause" onSave={(v) => patchRow("obligations", r, { source_ref: v })} /></td>
+                    <td><Text value={r.source_ref} disabled={busy} width={140} placeholder="clause" onSave={(v) => patchRow("obligations", r, { source_ref: v })} /><GrSourceChip src={r.source} /></td>
                     <RowStatus table="obligations" row={r} {...rowProps} />
                   </tr>
                 ))}
@@ -257,6 +269,24 @@ export default function RuleSetEditor({ id }: { id: string }) {
           applicant_category: "CHS", holding_basis: "govt_lease", land_use: "residential", rate_basis: "asr_land_value" })}
           cols={[["holding_basis", "Holding"], ["land_use", "Land use"], ["rate_pct", "Rate %"], ["rate_basis", "Basis"],
             ["window_from", "From", "date"], ["window_to", "To", "date"]]} />
+        {(rs.authorities?.length ?? 0) > 0 && (
+          <div style={{ marginTop: 18 }}>
+            <h3 style={{ margin: 0 }}>Who passes the order</h3>
+            <table className="data" style={{ marginTop: 8 }}>
+              <thead><tr><th>Authority</th><th>When</th><th>Source</th><th>Status</th></tr></thead>
+              <tbody>
+                {rs.authorities!.map((r) => (
+                  <tr key={r.id}>
+                    <td><b>{String(r.authority).replace("_", " ")}</b><div className="muted" style={{ fontSize: 12.5 }}>{String(r.text_en ?? "")}</div></td>
+                    <td className="mono" style={{ fontSize: 12 }}>{Object.keys((r.condition ?? {}) as object).length ? JSON.stringify(r.condition) : "always"}</td>
+                    <td>{r.source_ref}<GrSourceChip src={r.source} /></td>
+                    <td><span className="pill" style={{ color: STATUS_COLOUR[r.status] }}>{r.status}</span></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
         <FeeTable title="Adjustments" table="adjustments" rows={rs.adjustments} {...rowProps} onAdd={() => addRow("adjustments", {
           code: codeFrom("adjustment", new Set(rs.adjustments.map((r) => String(r.code)))), kind: "discount" })}
           cols={[["code", "Code"], ["kind", "Kind"], ["rate_pct", "Rate %"], ["amount", "Amount"],
@@ -395,7 +425,7 @@ function FeeTable({ title, table, rows, cols, onAdd, ...rowProps }: {
                   <td key={k}><Text value={r[k]} type={type} disabled={busy} width={type === "date" ? 140 : 110}
                     placeholder={k === "rate_pct" ? "fill in" : ""} onSave={(v) => patchRow(table, r, { [k]: v })} /></td>
                 ))}
-                <td><Text value={r.source_ref} disabled={busy} width={120} onSave={(v) => patchRow(table, r, { source_ref: v })} /></td>
+                <td><Text value={r.source_ref} disabled={busy} width={120} onSave={(v) => patchRow(table, r, { source_ref: v })} /><GrSourceChip src={r.source} /></td>
                 <RowStatus table={table} row={r} {...rowProps} />
               </tr>
             ))}

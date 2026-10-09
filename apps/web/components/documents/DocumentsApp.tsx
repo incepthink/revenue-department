@@ -1,9 +1,9 @@
 "use client";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { viewerHref, type Anchor, type CaseDetail, type IntakeFinding, type IntakeLevel, type IntakeView } from "@/lib/api";
+import { viewerHref, type Anchor, type CaseDetail, type IntakeFinding, type IntakeLevel, type IntakeReport, type IntakeView } from "@/lib/api";
 import { get, pageImageUrl } from "@/lib/client";
 import Icon from "../Icon";
-import { LEVEL_ORDER } from "../intake/levels";
+import { LEVEL_ORDER, VERDICT } from "../intake/levels";
 import DocViewer, { type DocViewerHandle, type ViewerDoc, type ViewerMark } from "../viewer/DocViewer";
 import FindingsPanel, { type PanelFilters, type PanelItem } from "./FindingsPanel";
 import TextView from "./TextView";
@@ -23,6 +23,24 @@ function anchorsOf(f: IntakeFinding): Anchor[] {
     kind: e.page_seq ? "page" : "missing", boxes: [], lines: [], precision: null, quote: e.raw ?? null,
     reason: e.page_seq ? (e.raw ? "not_found" : "no_quote") : null,
   }));
+}
+
+// The check's verdict and what the applicant has to do, above the findings.
+function Summary({ report }: { report: IntakeReport }) {
+  const v = VERDICT[report.verdict];
+  return (
+    <div className={`fp-summary ${report.verdict}`}>
+      <div className="fp-verdict"><span className="fp-verdict-icon" aria-hidden>{v.icon}</span> <b>{v.label}</b></div>
+      <div className="fp-headline">{report.headline}</div>
+      {report.limited && <div className="fp-headline muted">Read with pattern rules only — treat this result as partial.</div>}
+      {report.actions.length > 0 ? (
+        <details open className="fp-todo">
+          <summary><Icon name="clipboard" size={13} /> What the applicant needs to do <span className="count-pill">{report.actions.length}</span></summary>
+          <ol>{report.actions.map((a) => <li key={a}>{a}</li>)}</ol>
+        </details>
+      ) : <div className="fp-headline"><Icon name="checkCircle" size={13} /> Nothing to replace or add.</div>}
+    </div>
+  );
 }
 
 // The documents screen: the pages with the document check's findings drawn on them (Pages tab), or the extracted
@@ -132,7 +150,7 @@ export default function DocumentsApp({ caseId, params }: { caseId: string; param
       name: docName(d.id) === d.filename ? d.filename : `${docName(d.id)} · ${d.filename}`,
       pages: d.page_list.map((p) => ({
         key: String(p.seq), docId: d.id, pageNo: p.page_no, width: p.width_px || A4.w, height: p.height_px || A4.h,
-        src: (w: number) => pageImageUrl(caseId, p.seq, true, w),
+        src: (w: number) => pageImageUrl(caseId, p.seq, false, w),
       })),
       banner: about.length ? (
         <div className="dv-banner">
@@ -185,6 +203,7 @@ export default function DocumentsApp({ caseId, params }: { caseId: string; param
   const factRow = fact !== null ? report?.facts[fact] : undefined;
   const sidebar = report ? (
     <>
+      <Summary report={report} />
       {factRow && (
         <div className="fp-fact">
           <span className="pin static mk-fact">★</span>
@@ -219,13 +238,12 @@ export default function DocumentsApp({ caseId, params }: { caseId: string; param
           <button role="tab" className={tab === "text" ? "on" : ""} aria-selected={tab === "text"} onClick={() => switchTab("text")}><Icon name="text" size={13} /> Text</button>
         </div>
         <span className="spacer" />
-        <a className="btn" href={`/cases/${caseId}/intake`}><Icon name="clipboard" /> Document check</a>
+        <a className="btn" href={`/cases/${caseId}/intake`}><Icon name="clipboard" /> Full report</a>
       </div>
       {tab === "pages" ? (
         <DocViewer ref={viewer} docs={docs} marks={marks} selectedItem={selected ?? factMark?.itemId}
           onSelectMark={(m) => { if (m.itemId.startsWith("fact:")) return; setSelected(m.itemId); setUrl({ f: m.itemId, a: Number(m.id.split(":")[1]), tab }); }}
-          sidebar={sidebar}
-          toolbar={<span className="muted dv-hint"><Icon name="shield" size={12} /> Personal data masked</span>} />
+          sidebar={sidebar} />
       ) : (
         <TextView caseId={caseId} detail={detail} seq={textAt?.seq} lines={textAt?.lines} q={textAt?.q} notify={notify} />
       )}

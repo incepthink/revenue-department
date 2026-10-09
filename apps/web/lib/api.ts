@@ -28,6 +28,9 @@ export type CaseSummary = {
   card_version?: number | null;
   card_status?: string | null;
   review?: { mode: string; status: string; round: number; reviewer_id: string }[];
+  title?: string | null;
+  kind?: "case" | "noting";
+  noting_stage?: NotingStage | null;
 };
 
 export type Validation = {
@@ -242,6 +245,8 @@ export type Fee = {
   status: "computed" | "unverified" | "blocked"; total: string | null; components: Record<string, string>; trace: FeeStep[];
   blockers: string[]; unverified: string[]; depends_on_unverified: boolean; inputs: Record<string, unknown>;
   params: Record<string, unknown>; engine_version: string; rule_set_code: string | null; calculation_id?: string;
+  competent_authority?: { authority: string | null; name_en: string | null; name_mr: string | null; text_en: string | null;
+                          status: string | null; undecided: { code: string; needs: string[]; text_en: string | null }[] } | null;
 };
 
 export type Analysis = {
@@ -256,6 +261,7 @@ export type Analysis = {
   pool: Record<string, number>;
   precedents: Precedent[]; gaps: Gap[]; explanations: { source: string; check: string | null };
   steps: { done: Step[]; next: Step[] }; fee: Fee; warnings: string[];
+  provisions?: GrSource[]; accepted_cases?: AcceptedCase[];
 };
 
 export const BASIS_TEXT: Record<Basis, { en: string; mr: string; colour: string }> = {
@@ -285,7 +291,7 @@ export function viewerHref(caseId: string, at: { f?: string; a?: number; fact?: 
 }
 
 // ---- drafting (Phase 4) ---------------------------------------------------------------------------------
-export type TemplateCode = "SCRUTINY_NOTE" | "QUERY_LETTER" | "DEMAND_LETTER" | "COLLECTOR_ORDER";
+export type TemplateCode = "SCRUTINY_NOTE" | "QUERY_LETTER" | "DEMAND_LETTER" | "COLLECTOR_ORDER" | "NOTING";
 export type DraftDiff = {
   paragraphs: { generated: number; uploaded: number; unchanged: number; changed: number; inserted: number; deleted: number };
   similarity: number; clauses_edited: number; numbers_removed?: string[]; numbers_added?: string[];
@@ -301,6 +307,18 @@ export type DraftRow = {
   paragraphs?: string[]; notes?: { n: number; n_mr: string; text: string }[];
   clauses_used?: { clause_id: string; clause_key: string; origin: string; verification: string; text: string; missing: string[] }[];
   narratives?: { slot: string; source: string; check: string | null }[];
+};
+// a stored render laid out for the on-screen preview (GET /drafts/{id}/layout); lengths in pt
+export type DocRun = { text: string; bold: boolean; italic: boolean; underline: boolean; size: number; color: string | null };
+export type DocPara = {
+  kind: "p"; align: "left" | "right" | "center" | "justify"; left: number; right: number; first: number;
+  before: number; after: number; line: number; runs: DocRun[];
+};
+export type DocLayout = {
+  id: string; render_mode: "internal" | "issue"; version: number;
+  page: { width: number; height: number; margin: { top: number; right: number; bottom: number; left: number } };
+  header: string[]; watermark: string | null; page_numbers: boolean;
+  blocks: (DocPara | { kind: "table"; rows: DocPara[][][] })[];
 };
 export type DraftsView = {
   templates: { code: TemplateCode; kind: string; name_mr: string; name_en: string }[];
@@ -319,6 +337,7 @@ export type ClauseRow = {
 export type ClauseMeta = {
   kinds: string[]; condition_keys: string[]; filters: string[];
   slots: { name: string; description: string; example: unknown }[]; item_slots: { name: string; description: string; example: unknown }[];
+  noting_slots?: { name: string; description: string; example: unknown }[];
 };
 
 // ---- backtest (Phase 4) -----------------------------------------------------------------------------------
@@ -409,4 +428,203 @@ export type IntakeView = {
   state: "not_started" | "processing" | "done" | "failed"; assembling: boolean;
   progress: { total: number; read: number; checked: number }; llm: { provider: string; available: boolean };
   slots: IntakeSlot[]; documents: IntakeDoc[]; report: IntakeReport | null; report_at: string | null;
+};
+
+// ---------------------------------------------------------------------------------------------
+// GR library (Part 2): the department's GR compendium, cut into GRs, with editable OCR lines and search
+// ---------------------------------------------------------------------------------------------
+export type LibraryDoc = {
+  id: string; key: string; collection: "gr" | "case_note"; effective_from: string | null; section: string | null; section_seq: number | null; doc_type: string | null; type_label: string;
+  doc_date: string | null; doc_number: string | null; subject_mr: string | null; subject_en: string | null; topics: string[];
+  page_count: number | null; source_pages: [number | null, number | null]; verification: "verified" | "to_verify";
+  status: string; needs_reindex: boolean; provisions: number; lines_to_review: number;
+};
+export type LibraryPageInfo = {
+  id: string; page_no: number; source_page_no: number | null; section_page: number | null; width_px: number | null;
+  height_px: number | null; ocr_confidence: number | null; lines_to_review: number;
+  stats: { lines: number; agreed: number; adjudicated: number; uncertain: number; digit_suspects?: number } | null;
+};
+export type TimelineEntry = { link_id: string; document_id: string; doc_key: string | null; label: string | null; date: string | null; relation: string };
+export type ProvisionTimeline = { amended_by?: TimelineEntry[]; superseded_by?: TimelineEntry[]; corrected_by?: TimelineEntry[]; clarified_by?: TimelineEntry[] };
+export type InForce = "in_force" | "amended" | "superseded" | "not_yet";
+export type Provision = {
+  id: string; seq: number; label: string; kind: string; heading_path: string[]; page_from: number; page_to: number;
+  anchors: Anchor[]; snippet: string; in_force_from?: string | null; in_force_to?: string | null; timeline?: ProvisionTimeline;
+  status?: InForce;
+};
+export type LibraryDocDetail = LibraryDoc & {
+  issuing_desk: string | null; notes: string | null; verified_at: string | null;
+  proposed: { doc_date?: string | null; doc_number?: string | null; subject_en?: string | null; flags?: Record<string, unknown>;
+              evidence?: Record<string, { page: number; quote: string }> } | null;
+  pages: LibraryPageInfo[]; provisions: Provision[];
+  links_out?: LibraryLink[]; links_in?: LibraryLink[]; precedent?: PrecedentView | null;
+};
+export type LibraryLine = {
+  id: string; line_no: number; bbox: [number, number, number, number] | null; text: string; machine_text: string | null;
+  status: "agreed" | "adjudicated" | "disputed" | "single" | "unboxed" | "added"; uncertain: boolean;
+  reads: Record<string, string>; adjudication: { model: string; choice: "A" | "B" | "other"; note: string } | null;
+  hints: { digit_suspects?: { num: string; alt: string }[] }; reviewed: boolean; edited: boolean; note: string | null;
+  needs_review: boolean;
+};
+export type LibraryPageLines = {
+  page_id: string; page_no: number; source_page_no: number | null; section_page: number | null; lines: LibraryLine[];
+  stats: LibraryPageInfo["stats"];
+};
+export type ReviewItem = LibraryLine & { document_id: string; key: string; page_no: number; source_page_no: number | null };
+export type Passage = {
+  provision_id: string; document_id: string; doc_key: string; doc_type: string; doc_date: string | null;
+  doc_number: string | null; subject_mr: string; subject_en: string | null; verified: boolean; label: string; kind: string;
+  page_from: number; text: string; anchors: Anchor[]; score: number; chip: string; heading_path: string[];
+  status?: InForce | null; time_note?: string | null; in_force_from?: string | null; in_force_to?: string | null;
+  timeline?: ProvisionTimeline; pulled_in?: { reason: "replaces" | "amends"; provision_id: string; label: string; doc_key: string } | null;
+};
+export type SearchCite = { p: number; passage_id: string; quote: string; label?: string; anchor: Anchor | null; document_id: string };
+export type SearchAnswer = {
+  status: "answered" | "not_found" | "unavailable" | "error"; lang: "en" | "mr"; text?: string;
+  sentences: { text: string; cites: SearchCite[] }[]; dropped: { text: string; reason: string }[];
+};
+export type SearchResult = {
+  query: string; lang: "en" | "mr"; rewrite: Record<string, unknown>; answer: SearchAnswer | null; passages: Passage[];
+  in_force_on?: string | null; include_superseded?: boolean;
+};
+
+// Part 3: rules in time, GR citations, accepted cases
+export type DocRef = { document_id: string; key: string; collection: string; doc_type: string | null; type_label: string;
+                       doc_date: string | null; doc_number: string | null; subject_mr: string | null };
+export type LinkRelation = "amends" | "supersedes" | "corrigendum_of" | "clarifies" | "cites";
+export type LibraryLink = {
+  id: string; relation: LinkRelation; status: "proposed" | "confirmed" | "rejected"; source: "model" | "operator";
+  from: DocRef | null; from_label: string | null; to: DocRef | null; to_label: string | null;
+  cited: { kind?: string; date?: string | null; date_printed?: string | null; number?: string | null; part?: string | null };
+  evidence: { page_no?: number | null; quote?: string | null }; note: string | null; effective_date: string | null; decided_at: string | null;
+};
+export type TimelineView = {
+  topic: string | null; section: string | null; chains: string[][]; documents: LibraryDoc[]; links: LibraryLink[];
+  counts: { proposed: number; confirmed: number; rejected: number };
+};
+export type MissingGr = {
+  date: string | null; date_printed: string | null; number: string | null; kinds: string[]; documents: number;
+  cited_by: { link_id: string; document_id: string; key: string | null; collection: string | null; label: string | null;
+              relation: string; status: string; quote: string | null; page_no: number | null }[];
+};
+export type GrStatus = "IN_FORCE" | "AMENDED" | "SUPERSEDED" | "NOT_YET" | "NOT_IN_LIBRARY";
+export type AppliedGr = {
+  link_id: string; document_id: string | null; doc_key: string | null; label: string; date: string | null; number: string | null;
+  part: string | null; status: GrStatus; status_text: string; link_status: string; quote: string | null; page_no: number | null;
+  note_document_id: string;
+};
+export type Grounded = { value?: string; quote?: string; page_no?: number | null; anchor?: Anchor | null; grounded?: boolean | null };
+export type PrecedentAmount = Grounded & { kind: string; label: string | null; amount_printed: string; amount: string | null; rate_pct: string | null; basis: string | null };
+export type PrecedentFact = Grounded & { by?: string; summary?: string; date?: string | null; outcome?: string };
+export type PrecedentView = {
+  id: string; key: string; title: string | null; document_id: string; status: "verified" | "to_verify";
+  decided_on: string | null; outcome: string | null; case_types: string[];
+  facts: Record<string, PrecedentFact>;
+  amounts: PrecedentAmount[]; conditions: (Grounded & { text: string })[]; summary: { en?: string; mr?: string };
+  flags: { ungrounded?: string[] }; applied_grs: AppliedGr[]; statement: { en: string; outcome: string | null };
+  verified_at: string | null;
+};
+export type AcceptedCase = Omit<PrecedentView, "id" | "verified_at"> & {
+  precedent_id: string; score: number; features: Record<string, number>; reasons: string[];
+  proposal: PrecedentFact | null; decision: PrecedentFact | null;
+};
+export type GrSource = {
+  document_id?: string; doc_key: string; doc_type?: string | null; type_label?: string; doc_date?: string | null; doc_number?: string | null;
+  subject_mr?: string | null; found: boolean; reason?: string | null; quote?: string | null; provision_id?: string | null;
+  label?: string | null; page_no?: number | null; anchor?: Anchor | null; chip?: string; why?: string; rule?: string | null;
+  status?: GrStatus | null; status_text?: string | null;
+};
+export const GR_STATUS: Record<GrStatus, { text: string; lvl: string }> = {
+  IN_FORCE: { text: "In force", lvl: "lvl-ok" }, AMENDED: { text: "In force, amended", lvl: "lvl-info" },
+  SUPERSEDED: { text: "Superseded", lvl: "lvl-problem" }, NOT_YET: { text: "Not yet issued", lvl: "lvl-unchecked" },
+  NOT_IN_LIBRARY: { text: "Not in the library", lvl: "lvl-warning" },
+};
+export const RELATION_TEXT: Record<LinkRelation, string> = {
+  amends: "amends", supersedes: "supersedes", corrigendum_of: "corrects", clarifies: "clarifies", cites: "cites",
+};
+/** Link to a quote of a library document (GR or case note), opened on its page with the words marked. */
+export function sourceHref(s: { document_id?: string | null; provision_id?: string | null; page_no?: number | null; quote?: string | null }): string | null {
+  if (!s.document_id) return null;
+  return libraryHref(s.document_id, { prov: s.provision_id ?? undefined, page: s.page_no ?? undefined, q: s.quote ?? undefined });
+}
+export type LibraryTaxonomy = {
+  sections: Record<string, { topic: string; mr: string; en: string }>;
+  topics: Record<string, { mr: string; en: string }>;
+  types: Record<string, { mr: string; en: string }>;
+};
+
+export function libraryHref(docId: string, at: { prov?: string; page?: number; q?: string; tab?: "pages" | "lines" } = {}): string {
+  const sp = new URLSearchParams();
+  if (at.prov) sp.set("prov", at.prov);
+  if (at.page) sp.set("page", String(at.page));
+  if (at.q) sp.set("q", at.q);
+  if (at.tab && at.tab !== "pages") sp.set("tab", at.tab);
+  const qs = sp.toString();
+  return `/library/${docId}${qs ? `?${qs}` : ""}`;
+}
+
+export const libraryImageUrl = (docId: string, n: number, w: number) => `/api/rci/library/documents/${docId}/pages/${n}/image?w=${w}`;
+
+export function fmtDate(iso: string | null | undefined): string {
+  if (!iso) return "";
+  const [y, m, d] = iso.split("-");
+  return `${d}/${m}/${y}`;
+}
+
+// ---- Prepare Noting: a Collector's report → the department's Noting ---------------------------------------
+export type NotingStage = "uploaded" | "segmenting" | "awaiting_range" | "reading" | "extracting" | "awaiting_review"
+  | "generating" | "done" | "failed";
+export type NotingPage = {
+  page: number; blank: boolean; source: "text" | "vision" | "none"; kind: string | null; issuer: string | null;
+  starts_document: boolean | null; signature: boolean; copy_to: boolean; subject?: boolean;
+  ocr_status: string | null; has_image: boolean; width_px: number | null; height_px: number | null;
+};
+export type NotingAnchor = { page_seq: number; kind: string; boxes: number[][]; lines: number[]; precision: string | null; quote: string };
+export type NotingSuspect = { line: number; num: string; alt: string };
+export type NotingFact = {
+  value: unknown; printed?: string; quote?: string; page?: number | null; anchor?: NotingAnchor | null;
+  grounded?: boolean | null; source?: "model" | "rules" | "operator"; ocr_uncertain?: NotingSuspect[];
+  original?: { value: unknown; printed?: string | null } | null; confirmed?: boolean; year?: number | null;
+};
+export type NotingItem = NotingFact & {
+  id: string; kind?: string; label?: string; amount?: string | null; paid?: boolean | null; paid_on?: string | null;
+  challan?: string; text?: string; date?: string | null; by?: string; number?: string; title?: string;
+};
+export type NotingFacts = {
+  scalars: Record<string, NotingFact>; amounts: NotingItem[]; references: NotingItem[]; history: NotingItem[];
+  reports: NotingItem[]; instruments: NotingItem[];
+};
+export type NotingFlag = {
+  code: string; level: "problem" | "warning" | "info"; message: string; expected: unknown; found: unknown; facts: string[];
+};
+export type NotingBlock = {
+  id: string; text: string; role: string; pages: number[]; edited?: boolean; original_text?: string; role_source?: string;
+};
+export type NotingDraft = { version: number; status: string | null; facts_version: number | null; stale: boolean;
+  internal: DraftRow | null; issue: DraftRow | null };
+export type NotingView = {
+  case: { id: string; case_ref: string; title: string | null; data_class: string; status: string; society_name: string | null; created_at: string };
+  stage: NotingStage; failed_stage: NotingStage | null; error: string | null; page_count: number | null;
+  pages: NotingPage[];
+  range: { proposed: { pages: number[]; method: string; confidence: "high" | "medium" | "low"; reasons: string[] } | null;
+           confirmed: number[]; confirmed_at: string | null; max_pages: number };
+  read: { summary: { pages: number; read: number; failed: number; text_layer: number; digit_suspects: number; uncertain_lines: number } | null;
+          flags: NotingFlag[]; failed: Record<string, string>;
+          pages: Record<string, { engine?: string; suspects?: (NotingSuspect & { text: string })[]; uncertain_lines?: number[] }> };
+  blocks: NotingBlock[]; facts: NotingFacts; facts_version: number;
+  validation: { flags: NotingFlag[]; counts: Partial<Record<"problem" | "warning" | "info", number>>; ok: boolean | null };
+  extraction: { method: "model" | "rules" | null; version: string | null; at: string | null;
+                rule: { rule_set_code: string; rate_pct: string | null; status: string } | null };
+  edits: { at: string; op: string; target: string; name?: string; id?: string; from?: string; to?: string }[];
+  labels: Record<string, string>; draft: NotingDraft | null; restated_roles: string[]; roles: string[];
+};
+export type NotingStatus = {
+  case_id: string; stage: NotingStage; failed_stage: NotingStage | null; error: string | null; facts_version: number;
+  progress: { pages: number; read: number; page_count: number | null };
+  // the proposed pages, read while the range step is open (absent from an older API)
+  prefetch?: { pages: number[]; done: boolean; read: number[] };
+};
+export type NotingOp = {
+  op: "set" | "add" | "remove" | "confirm"; target: "scalar" | "amount" | "reference" | "history" | "report" | "instrument";
+  name?: string; id?: string; value?: unknown; printed?: string; fields?: Record<string, unknown>;
 };

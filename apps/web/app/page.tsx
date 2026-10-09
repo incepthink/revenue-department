@@ -7,8 +7,17 @@ export const dynamic = "force-dynamic";
 
 type Stage = { label: string; tone: "ok" | "info" | "warning" | "problem" | "unchecked" };
 
+const NOTING_STAGE: Record<string, Stage> = {
+  uploaded: { label: "Examining pages", tone: "unchecked" }, segmenting: { label: "Examining pages", tone: "unchecked" },
+  awaiting_range: { label: "Confirm report pages", tone: "warning" }, reading: { label: "Reading the letter", tone: "unchecked" },
+  extracting: { label: "Reading the facts", tone: "unchecked" }, awaiting_review: { label: "Review the facts", tone: "warning" },
+  generating: { label: "Writing the Noting", tone: "unchecked" }, done: { label: "Noting ready", tone: "ok" },
+  failed: { label: "Noting failed", tone: "problem" },
+};
+
 // One status per case, folding pipeline state, card status and review progress together.
 function stageOf(c: CaseSummary): Stage {
+  if (c.kind === "noting") return NOTING_STAGE[c.noting_stage ?? "uploaded"] ?? { label: "Noting", tone: "info" };
   if (c.card_status === "approved" || c.status === "approved") return { label: "Approved", tone: "ok" };
   if (c.status === "failed") return { label: "Processing failed", tone: "problem" };
   if (c.review?.length) return { label: "In review", tone: "info" };
@@ -32,14 +41,16 @@ export default async function CasesPage() {
     error = String(e);
   }
   const stages = cases.map(stageOf);
+  const notings = cases.filter((c) => c.kind === "noting").length;
   const approved = stages.filter((s) => s.label === "Approved").length;
   const inReview = stages.filter((s) => s.label === "In review").length;
-  const open = cases.length - approved;
+  const open = cases.length - notings - approved;
   const stats: { label: string; value: number; icon: IconName; tone?: string }[] = [
-    { label: "Total cases", value: cases.length, icon: "folder" },
+    { label: "Total cases", value: cases.length - notings, icon: "folder" },
     { label: "Open", value: open, icon: "clock", tone: "warn" },
     { label: "In review", value: inReview, icon: "eye", tone: "muted" },
     { label: "Approved", value: approved, icon: "checkCircle", tone: "ok" },
+    { label: "Notings", value: notings, icon: "edit", tone: "muted" },
   ];
   return (
     <main className="page">
@@ -72,6 +83,26 @@ export default async function CasesPage() {
             <tbody>
               {cases.map((c, i) => {
                 const s = stages[i];
+                if (c.kind === "noting") {
+                  return (
+                    <tr key={c.id}>
+                      <td>
+                        <div className="case-ref">
+                          <span className="case-avatar"><Icon name="edit" size={16} /></span>
+                          <a href={`/notings/${c.id}`}>{c.title ?? c.case_ref}</a>
+                          <span className="pill">Noting</span>
+                        </div>
+                      </td>
+                      <td><span className={`pill status lvl-${s.tone}`}>{s.label}</span></td>
+                      <td className="date">{fmtDate(c.filed_on)}</td>
+                      <td className="date">—</td>
+                      <td className="actions-col">
+                        <a className="btn small" href={`/notings/${c.id}`}><Icon name="edit" size={14} /> Noting</a>
+                        <a className="btn small" href={`/cases/${c.id}/documents`}><Icon name="eye" size={14} /> Pages</a>
+                      </td>
+                    </tr>
+                  );
+                }
                 return (
                   <tr key={c.id}>
                     <td>

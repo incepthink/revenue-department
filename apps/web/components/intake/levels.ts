@@ -1,6 +1,6 @@
-import type { IntakeLevel } from "@/lib/api";
+import type { IntakeLevel, IntakeReport } from "@/lib/api";
 
-// Finding levels as the document check and the document viewer show them, in panel order.
+// Finding levels and verdicts as the document check and the document viewer show them, levels in panel order.
 export const LEVEL: Record<IntakeLevel, { label: string; icon: string }> = {
   problem: { label: "Problems to resolve", icon: "✕" },
   warning: { label: "Points for the officer", icon: "!" },
@@ -10,3 +10,9 @@ export const LEVEL: Record<IntakeLevel, { label: string; icon: string }> = {
 };
 
 export const LEVEL_ORDER: IntakeLevel[] = ["problem", "warning", "info", "unchecked", "ok"];
+
+export const VERDICT: Record<IntakeReport["verdict"], { label: string; icon: string }> = {
+  ready: { label: "Ready for scrutiny", icon: "✓" },
+  needs_attention: { label: "Needs attention", icon: "!" },
+  incomplete: { label: "Incomplete", icon: "✕" },
+};

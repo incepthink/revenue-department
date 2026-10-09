@@ -1,9 +1,10 @@
 "use client";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import {
-  BASIS_TEXT, STATUS_COLOUR, citeHref,
-  type Analysis, type Basis, type Cite, type Fee, type Gap, type Precedent, type Step,
+  BASIS_TEXT, GR_STATUS, STATUS_COLOUR, citeHref, fmtDate, sourceHref,
+  type AcceptedCase, type Analysis, type Basis, type Cite, type Fee, type Gap, type GrSource, type Precedent, type Step,
 } from "@/lib/api";
+import { AppliedGrs } from "@/components/library/PrecedentPanel";
 import { ApiError, get, send } from "@/lib/client";
 
 const pct = (v: number | null | undefined) => (v == null ? "—" : `${Math.round(v * 100)}%`);
@@ -120,7 +121,9 @@ function Body({ a }: { a: Analysis }) {
       <Precedents rows={a.precedents} />
       <Gaps rows={a.gaps} />
       <Steps done={a.steps.done} next={a.steps.next} />
-      <FeeTrace fee={a.fee} />
+      <FeeTrace fee={a.fee} provisions={a.provisions ?? []} />
+      <GrProvisions rows={a.provisions ?? []} on={a.rule_date} />
+      <AcceptedCases rows={a.accepted_cases ?? []} on={a.rule_date} />
     </>
   );
 }
@@ -311,8 +314,17 @@ const FEE_STATUS: Record<Fee["status"], { cls: string; text: string }> = {
   blocked: { cls: "error", text: "Cannot be computed yet — see what is missing below. Every step that could run is shown." },
 };
 
-function FeeTrace({ fee }: { fee: Fee }) {
+function GrChip({ g }: { g: GrSource }) {
+  const href = g.found ? sourceHref({ document_id: g.document_id, provision_id: g.provision_id, page_no: g.page_no, quote: g.quote }) : null;
+  const text = `${g.doc_key}${g.label ? ` ${g.label}` : ""}${g.page_no ? ` · p.${g.page_no}` : ""}`;
+  return href
+    ? <a className="cite-chip" href={href} target="_blank" rel="noreferrer" title={g.quote ?? undefined}>{text}</a>
+    : <span className="pill status lvl-warning" title={g.quote ?? undefined}>{g.doc_key}: not in the library</span>;
+}
+
+function FeeTrace({ fee, provisions }: { fee: Fee; provisions: GrSource[] }) {
   const st = FEE_STATUS[fee.status];
+  const byRule = new Map(provisions.filter((p) => p.rule).map((p) => [p.rule as string, p]));
   return (
     <section className="card section">
       <div className="row" style={{ justifyContent: "space-between" }}>
@@ -346,11 +358,69 @@ function FeeTrace({ fee }: { fee: Fee }) {
                       {s.kind === "asr" ? `ASR ${s.village} ${s.year} ₹${s.rate ?? "—"}` : s.seed_key ?? s.rule_set_code ?? s.code}
                       {s.status ? ` · ${s.status}` : ""}
                     </span>)}
+                {t.sources.map((s, i) => {
+                  const g = byRule.get(s.seed_key ?? s.code ?? "");
+                  return g ? <GrChip key={`gr${i}`} g={g} /> : null;
+                })}
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+    </section>
+  );
+}
+
+// ------------------------------------------------------------------------------------------------
+function GrProvisions({ rows, on }: { rows: GrSource[]; on: string }) {
+  return (
+    <section className="card section">
+      <h2>GR provisions in force on {fmtDate(on)} <small className="muted">({rows.length})</small></h2>
+      <p className="muted" style={{ marginTop: 0 }}>
+        The provisions behind the rate and the competent authority above, the obligations in force, and what GR search finds
+        for this kind of case on the rule date. Each opens the GR page with the words marked.
+      </p>
+      {!rows.length ? <p className="muted">No GR provisions found (the library may not be loaded).</p> : (
+        <table className="data">
+          <thead><tr><th>Why</th><th>GR</th><th>Words</th><th>On {fmtDate(on)}</th></tr></thead>
+          <tbody>
+            {rows.map((g, i) => (
+              <tr key={i}>
+                <td style={{ whiteSpace: "nowrap" }}>{g.why}{g.rule && <div className="muted mono" style={{ fontSize: 11 }}>{g.rule}</div>}</td>
+                <td><GrChip g={g} /><div className="muted" style={{ fontSize: 12 }}>{g.type_label} {fmtDate(g.doc_date)}</div></td>
+                <td lang="mr" style={{ fontSize: 12.5, maxWidth: 520 }}>{g.quote}</td>
+                <td>{g.status ? <span className={`pill status ${GR_STATUS[g.status].lvl}`}>{GR_STATUS[g.status].text}</span> : <span className="muted">—</span>}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </section>
+  );
+}
+
+function AcceptedCases({ rows, on }: { rows: AcceptedCase[]; on: string }) {
+  return (
+    <section className="card section">
+      <h2>Accepted cases <small className="muted">({rows.length})</small></h2>
+      <p className="muted" style={{ marginTop: 0 }}>
+        Cases the department decided, read from its case notes, closest first (kind of case, holding, location, area, then
+        the note&apos;s text). With so few notes this is a demonstrator: it grows as the department sends more decided cases.
+      </p>
+      {!rows.length ? <p className="muted">No accepted case notes loaded yet.</p> : rows.map((c) => (
+        <article key={c.precedent_id} className="lib-accepted">
+          <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
+            <a href={`/library/${c.document_id}?tab=details`} target="_blank" rel="noreferrer"><b>{c.title ?? c.key}</b></a>
+            <span className="badge">match {Math.round(c.score * 100)}%</span>
+            {c.decided_on && <span className="muted">decided {fmtDate(c.decided_on)}</span>}
+            {c.status !== "verified" && <span className="pill status lvl-unchecked">To verify</span>}
+          </div>
+          <p className="lib-statement">{c.statement.en}</p>
+          {c.reasons.length > 0 && <div className="muted" style={{ fontSize: 12.5 }}>{c.reasons.join(" · ")}</div>}
+          <h4 style={{ margin: "8px 0 4px" }}>GRs it applied, on {fmtDate(on)}</h4>
+          <AppliedGrs grs={c.applied_grs} />
+        </article>
+      ))}
     </section>
   );
 }
