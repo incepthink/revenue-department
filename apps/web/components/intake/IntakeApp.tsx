@@ -7,16 +7,11 @@ import {
 } from "@/lib/api";
 import { get, send } from "@/lib/client";
 import Icon from "../Icon";
-import { LEVEL, LEVEL_ORDER } from "./levels";
+import { LEVEL, LEVEL_ORDER, VERDICT } from "./levels";
 
 const POLL_MS = 2000;
 const STUCK_MS = 120_000; // no progress for this long → offer a restart (e.g. the API restarted mid-run)
 
-const VERDICT: Record<IntakeReport["verdict"], { label: string; icon: string }> = {
-  ready: { label: "Ready for scrutiny", icon: "✓" },
-  needs_attention: { label: "Needs attention", icon: "!" },
-  incomplete: { label: "Incomplete", icon: "✕" },
-};
 const STAGE: Record<IntakeStage, { label: string; busy?: boolean; done?: boolean; bad?: boolean }> = {
   queued: { label: "Waiting" },
   reading: { label: "Reading pages", busy: true },
@@ -54,7 +49,8 @@ function PageLink({ caseId, seq, snippet, href: to, children }: {
   return <a className="cite" href={href} target="_blank" rel="noreferrer" title={snippet ?? "Open the page"}>{children ?? `p.${seq}`}</a>;
 }
 
-export default function IntakeApp({ caseId }: { caseId: string }) {
+// `toPages`: a case just created — once the check is done, the results open on the pages, findings drawn on them.
+export default function IntakeApp({ caseId, toPages = false }: { caseId: string; toPages?: boolean }) {
   const [view, setView] = useState<IntakeView | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -69,6 +65,10 @@ export default function IntakeApp({ caseId }: { caseId: string }) {
       try {
         const s = await get<IntakeView>(`/cases/${caseId}/intake/status`);
         if (stop) return;
+        if (s.state === "done" && toPages) {
+          window.location.replace(`/cases/${caseId}/documents`);
+          return;
+        }
         if (s.state === "done" || s.state === "failed" || s.state === "not_started") {
           // the full view (extracted values, findings) is read once — that read is audited, the poll is not
           const full = s.state === "done" ? await get<IntakeView>(`/cases/${caseId}/intake`) : s;
@@ -91,7 +91,7 @@ export default function IntakeApp({ caseId }: { caseId: string }) {
       stop = true;
       clearTimeout(timer);
     };
-  }, [caseId, run]);
+  }, [caseId, run, toPages]);
 
   const start = async (restart = false) => {
     setBusy(true);

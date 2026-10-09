@@ -142,7 +142,8 @@ function Editor({ c, meta, canEdit, isAdmin, onSaved }: { c: ClauseRow; meta: Cl
       }
     }
   };
-  const slots = [...(meta?.slots ?? []), ...(key.startsWith("query_item.") ? meta?.item_slots ?? [] : [])];
+  const slots = key.startsWith("noting.") ? meta?.noting_slots ?? []
+    : [...(meta?.slots ?? []), ...(key.startsWith("query_item.") ? meta?.item_slots ?? [] : [])];
   return (
     <section className="card stack">
       <label>Clause key <input value={key} onChange={(e) => setKey(e.target.value)} style={{ width: "100%" }} disabled={!canEdit} /></label>

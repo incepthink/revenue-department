@@ -2,6 +2,7 @@
 import { useRef, useState, type DragEvent, type FormEvent, type ReactNode } from "react";
 import { send } from "@/lib/client";
 import Icon from "./Icon";
+import NewNoting from "./NewNoting";
 
 const EXTENSIONS = [".pdf", ".png", ".jpg", ".jpeg", ".tif", ".tiff", ".zip"];
 const ACCEPT = EXTENSIONS.join(",");
@@ -20,7 +21,7 @@ const supported = (f: File) => EXTENSIONS.some((ext) => f.name.toLowerCase().end
 // Header row (heading + "+ New case" button); the form opens below it. Every file of the case goes into one drop
 // zone, uploaded with the slot "auto": the intake works out what each file is (a standard filing document or an
 // additional one), checks it, then checks the documents against each other. Creates the case, uploads, starts the
-// intake and opens the results page, which follows the progress.
+// intake and opens the progress page, which turns into the pages with the findings drawn on them when the check is done.
 export default function NewCase({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
@@ -65,7 +66,7 @@ export default function NewCase({ children }: { children: ReactNode }) {
       setStep(`Uploading ${files.length} file${files.length === 1 ? "" : "s"}…`);
       await send("POST", `/cases/${c.id}/documents?process=false`, fd);
       await send("POST", `/cases/${c.id}/intake`);
-      window.location.href = `/cases/${c.id}/intake`;
+      window.location.href = `/cases/${c.id}/intake?new=1`;
     } catch (err) {
       setMsg({ kind: "error", text: String((err as Error).message) });
       setStep(null);
@@ -76,7 +77,10 @@ export default function NewCase({ children }: { children: ReactNode }) {
     <>
       <div className="page-head">
         {children}
-        {!open && <button className="primary" onClick={() => setOpen(true)}><Icon name="plus" /> New case</button>}
+        <div className="row">
+          <NewNoting />
+          {!open && <button className="primary" onClick={() => setOpen(true)}><Icon name="plus" /> New case</button>}
+        </div>
       </div>
       {open && (
         <form onSubmit={submit} className="card stack new-case" style={{ gap: 16 }}>

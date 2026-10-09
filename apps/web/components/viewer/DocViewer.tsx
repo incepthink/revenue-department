@@ -17,6 +17,7 @@ export type DocViewerHandle = { scrollToMark(id: string): void; scrollToPage(key
 
 const ZOOMS = [0.5, 0.75, 1, 1.25, 1.5, 2, 2.5, 3];
 const TIERS = [800, 1600, 2400];
+const THUMB_W = 240; // px: ~120px thumbnails at 2x; the case page-image API rejects w < 200
 const FIT_MAX = 960; // px: the "fit width" page width on wide screens
 const FLASH_MS = 1400;
 
@@ -151,7 +152,7 @@ const DocViewer = forwardRef<DocViewerHandle, Props>(function DocViewer({ docs, 
                   aria-label={`${d.name}, page ${p.pageNo}${n ? `, ${n} mark${n === 1 ? "" : "s"}` : ""}`}>
                   <span className="dv-thumb-img" style={{ aspectRatio: `${p.width} / ${p.height}` }}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={p.src(180)} alt="" loading="lazy" />
+                    <img src={p.src(THUMB_W)} alt="" loading="lazy" />
                     {n > 0 && <span className="dv-thumb-count">{n}</span>}
                   </span>
                   <span className="dv-thumb-no">p.{p.pageNo}</span>
