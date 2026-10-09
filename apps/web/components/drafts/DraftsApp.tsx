@@ -92,7 +92,7 @@ export default function DraftsApp({ caseId, caseRef }: { caseId: string; caseRef
   );
 }
 
-function Checks({ d }: { d: DraftRow }) {
+export function Checks({ d }: { d: DraftRow }) {
   return (
     <div className="row" style={{ gap: 6, marginTop: 8 }}>
       <span className={`badge`} style={{ color: d.leak_check?.ok ? "var(--ok)" : "var(--bad)" }}>
@@ -108,7 +108,10 @@ function Checks({ d }: { d: DraftRow }) {
   );
 }
 
-function Detail({ issueId, internalId, rating, onChange }: { issueId: string; internalId?: string; rating?: { rating: number; usability: string; comment: string | null }; onChange: () => void }) {
+export function Detail({ issueId, internalId, rating, onChange, preview = true }: {
+  issueId: string; internalId?: string; rating?: { rating: number; usability: string; comment: string | null }; onChange: () => void;
+  preview?: boolean;  // false: the caller shows the document itself (the Noting's page preview)
+}) {
   const [mode, setMode] = useState<"issue" | "internal">("internal");
   const [issue, setIssue] = useState<DraftRow | null>(null);
   const [internal, setInternal] = useState<DraftRow | null>(null);
@@ -147,15 +150,19 @@ function Detail({ issueId, internalId, rating, onChange }: { issueId: string; in
   const shown = mode === "issue" ? issue : internal;
   return (
     <div style={{ marginTop: 10 }}>
-      <div className="tabs" style={{ position: "static" }}>
-        <button className={mode === "internal" ? "on" : ""} onClick={() => setMode("internal")}>Internal (with provenance)</button>
-        <button className={mode === "issue" ? "on" : ""} onClick={() => setMode("issue")}>Issue (clean)</button>
-      </div>
-      <div className="grid2" style={{ marginTop: 10, alignItems: "start" }}>
-        <div className="card" style={{ background: "var(--panel-2)", maxHeight: 560, overflow: "auto" }}>
-          {mode === "internal" && <div className="notice" style={{ marginBottom: 8, fontSize: 12 }}>AI-सहाय्यित मसुदा — अंतर्गत वापरासाठी</div>}
-          {shown?.paragraphs?.map((p, i) => <p key={i} style={{ margin: "3px 0", fontSize: 13.5, whiteSpace: "pre-wrap" }}>{p}</p>) ?? <p className="muted">Loading…</p>}
+      {preview && (
+        <div className="tabs" style={{ position: "static" }}>
+          <button className={mode === "internal" ? "on" : ""} onClick={() => setMode("internal")}>Internal (with provenance)</button>
+          <button className={mode === "issue" ? "on" : ""} onClick={() => setMode("issue")}>Issue (clean)</button>
         </div>
+      )}
+      <div className={preview ? "grid2" : "stack"} style={{ marginTop: 10, alignItems: "start" }}>
+        {preview && (
+          <div className="card" style={{ background: "var(--panel-2)", maxHeight: 560, overflow: "auto" }}>
+            {mode === "internal" && <div className="notice" style={{ marginBottom: 8, fontSize: 12 }}>AI-सहाय्यित मसुदा — अंतर्गत वापरासाठी</div>}
+            {shown?.paragraphs?.map((p, i) => <p key={i} style={{ margin: "3px 0", fontSize: 13.5, whiteSpace: "pre-wrap" }}>{p}</p>) ?? <p className="muted">Loading…</p>}
+          </div>
+        )}
         <div className="stack">
           {mode === "internal" && internal && (
             <div>
